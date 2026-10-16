@@ -1,9 +1,17 @@
 import type { Metadata } from 'next';
+import { Lexend } from 'next/font/google';
 import './globals.css';
 
+const lexend = Lexend({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-lexend',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
-  title: 'eCitizen Kenya | Public Service Request System',
-  description: 'Official digital gateway to Government of Kenya public services. Apply for DCI Good Conduct, NTSA Driving License, BRS Business Registration, and track requests online.',
+  title: 'eCitizen.go.ke - Government of Kenya services simplified',
+  description: 'Government of Kenya online portal offers services from Ministries, Counties, Departments, and Agencies. Manage all your govt records in one place.',
 };
 
 export default function RootLayout({
@@ -12,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-gray-50 text-gray-900 antialiased">
+    <html lang="en" className={`${lexend.variable} font-lexend h-full`}>
+      <body className="min-h-full bg-white text-gray-900 antialiased font-lexend">
         {children}
       </body>
     </html>
