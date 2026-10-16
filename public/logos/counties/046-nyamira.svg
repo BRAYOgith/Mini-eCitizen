@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="g-046" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#047857" />
+      <stop offset="100%" stop-color="#064e3b" />
+    </linearGradient>
+    <filter id="f-046" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.2" />
+    </filter>
+  </defs>
+  <circle cx="100" cy="100" r="95" fill="#ffffff" stroke="#e2e8f0" stroke-width="2" filter="url(#f-046)" />
+  <circle cx="100" cy="100" r="88" fill="none" stroke="#bb0000" stroke-width="2.5" />
+  <circle cx="100" cy="100" r="84" fill="none" stroke="#facc15" stroke-width="1.5" stroke-dasharray="3,2" />
+  <circle cx="100" cy="100" r="78" fill="url(#g-046)" />
+
+  <!-- Distinct Heraldic Icon -->
+  <g transform="translate(100, 68)">
+    <polygon points="-25,18 -5,-10 15,18" fill="#059669"/><path d="M5,18 L25,-5 L35,18" fill="#047857"/><circle cx="-5" cy="-16" r="4" fill="#fbbf24"/>
+  </g>
+
+  <!-- County Code Pill -->
+  <rect x="34" y="110" width="132" height="24" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="100" y="126" font-family="'Lexend', 'Segoe UI', sans-serif" font-size="11" font-weight="800" fill="#047857" text-anchor="middle" letter-spacing="1">COUNTY 046</text>
+
+  <!-- County Name and Motto -->
+  <text x="100" y="148" font-family="'Lexend', 'Segoe UI', sans-serif" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="0.5">NYAMIRA COUNTY</text>
+  <text x="100" y="160" font-family="'Lexend', 'Segoe UI', sans-serif" font-size="6.5" font-weight="600" fill="#fde047" text-anchor="middle" letter-spacing="0.4">MANGA RIDGE & TEA</text>
+  <text x="100" y="170" font-family="'Lexend', 'Segoe UI', sans-serif" font-size="5.5" font-weight="500" fill="#e2e8f0" text-anchor="middle" letter-spacing="0.2">NYANZA REGION • REPUBLIC OF KENYA</text>
+</svg>

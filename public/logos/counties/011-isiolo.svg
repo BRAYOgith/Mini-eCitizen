@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="g-011" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b45309" />
+      <stop offset="100%" stop-color="#78350f" />
+    </linearGradient>
+    <filter id="f-011" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.2" />
+    </filter>
+  </defs>
+  <circle cx="100" cy="100" r="95" fill="#ffffff" stroke="#e2e8f0" stroke-width="2" filter="url(#f-011)" />
+  <circle cx="100" cy="100" r="88" fill="none" stroke="#bb0000" stroke-width="2.5" />
+  <circle cx="100" cy="100" r="84" fill="none" stroke="#facc15" stroke-width="1.5" stroke-dasharray="3,2" />
+  <circle cx="100" cy="100" r="78" fill="url(#g-011)" />
+
+  <!-- Distinct Heraldic Icon -->
+  <g transform="translate(100, 68)">
+    <ellipse cx="0" cy="10" rx="18" ry="10" fill="#d97706"/><circle cx="16" cy="0" r="5" fill="#d97706"/><path d="M0,0 Q5,-10 10,0" fill="#b45309"/><circle cx="-15" cy="-15" r="8" fill="#fde047"/>
+  </g>
+
+  <!-- County Code Pill -->
+  <rect x="34" y="110" width="132" height="24" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="100" y="126" font-family="'Lexend', 'Segoe UI', sans-serif" font-size="11" font-weight="800" fill="#b45309" text-anchor="middle" letter-spacing="1">COUNTY 011</text>
+
+  <!-- County Name and Motto -->
+  <text x="100" y="148" font-family="'Lexend', 'Segoe UI', sans-serif" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="0.5">ISIOLO COUNTY</text>
+  <text x="100" y="160" font-family="'Lexend', 'Segoe UI', sans-serif" font-size="6.5" font-weight="600" fill="#fde047" text-anchor="middle" letter-spacing="0.4">RESORT OASIS & CAMEL</text>
+  <text x="100" y="170" font-family="'Lexend', 'Segoe UI', sans-serif" font-size="5.5" font-weight="500" fill="#e2e8f0" text-anchor="middle" letter-spacing="0.2">EASTERN REGION • REPUBLIC OF KENYA</text>
+</svg>

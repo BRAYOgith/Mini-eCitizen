@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="grad-042" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#006633" />
+      <stop offset="50%" stop-color="#00595E" />
+      <stop offset="100%" stop-color="#003820" />
+    </linearGradient>
+    <filter id="shadow-042" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.2" />
+    </filter>
+  </defs>
+  <circle cx="100" cy="100" r="94" fill="#ffffff" stroke="#e5e7eb" stroke-width="2" filter="url(#shadow-042)" />
+  <circle cx="100" cy="100" r="86" fill="none" stroke="#bb0000" stroke-width="2.5" />
+  <circle cx="100" cy="100" r="82" fill="none" stroke="#eab308" stroke-width="1.5" stroke-dasharray="3,2" />
+  <circle cx="100" cy="100" r="76" fill="url(#grad-042)" />
+
+  <g transform="translate(100, 72) scale(0.7)">
+    <!-- Spears -->
+    <line x1="-42" y1="35" x2="42" y2="-35" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    <line x1="42" y1="35" x2="-42" y2="-35" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    <!-- Traditional Shield -->
+    <path d="M-28,-24 Q0,-32 28,-24 Q32,15 0,42 Q-32,15 -28,-24 Z" fill="#bb0000" stroke="#ffffff" stroke-width="2.5"/>
+    <path d="M-10,-24 Q0,-30 10,-24 Q12,12 0,36 Q-12,12 -10,-24 Z" fill="#000000" stroke="#ffffff" stroke-width="1.5"/>
+    <!-- Harambee emblem star -->
+    <polygon points="0,-4 3,3 10,3 5,8 7,15 0,11 -7,15 -5,8 -10,3 -3,3" fill="#fbbf24" stroke="#ffffff" stroke-width="0.8"/>
+  </g>
+
+  <!-- County Pill Ribbon -->
+  <rect x="36" y="112" width="128" height="24" rx="12" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="100" y="128" font-family="'Lexend', 'Segoe UI', sans-serif" font-size="11" font-weight="800" fill="#006633" text-anchor="middle" letter-spacing="1">COUNTY 042</text>
+
+  <!-- County Name and Subtext -->
+  <text x="100" y="150" font-family="'Lexend', 'Segoe UI', sans-serif" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="0.5">KISUMU COUNTY</text>
+  <text x="100" y="162" font-family="'Lexend', 'Segoe UI', sans-serif" font-size="7" font-weight="600" fill="#fbbf24" text-anchor="middle" letter-spacing="0.3">NYANZA REGION • KENYA</text>
+</svg>

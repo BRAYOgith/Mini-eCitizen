@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="g-022" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#166534" />
+      <stop offset="100%" stop-color="#14532d" />
+    </linearGradient>
+    <filter id="f-022" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.2" />
+    </filter>
+  </defs>
+  <circle cx="100" cy="100" r="95" fill="#ffffff" stroke="#e2e8f0" stroke-width="2" filter="url(#f-022)" />
+  <circle cx="100" cy="100" r="88" fill="none" stroke="#bb0000" stroke-width="2.5" />
+  <circle cx="100" cy="100" r="84" fill="none" stroke="#facc15" stroke-width="1.5" stroke-dasharray="3,2" />
+  <circle cx="100" cy="100" r="78" fill="url(#g-022)" />
+
+  <!-- Distinct Heraldic Icon -->
+  <g transform="translate(100, 68)">
+    <ellipse cx="0" cy="5" rx="14" ry="18" fill="#ca8a04"/><path d="M-8,-12 L0,-25 L8,-12" fill="#15803d"/><circle cx="-8" cy="10" r="3.5" fill="#991b1b"/><circle cx="8" cy="10" r="3.5" fill="#991b1b"/>
+  </g>
+
+  <!-- County Code Pill -->
+  <rect x="34" y="110" width="132" height="24" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="100" y="126" font-family="'Lexend', 'Segoe UI', sans-serif" font-size="11" font-weight="800" fill="#166534" text-anchor="middle" letter-spacing="1">COUNTY 022</text>
+
+  <!-- County Name and Motto -->
+  <text x="100" y="148" font-family="'Lexend', 'Segoe UI', sans-serif" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="0.5">KIAMBU COUNTY</text>
+  <text x="100" y="160" font-family="'Lexend', 'Segoe UI', sans-serif" font-size="6.5" font-weight="600" fill="#fde047" text-anchor="middle" letter-spacing="0.4">KIAMBU COFFEE & PINEAPPLE</text>
+  <text x="100" y="170" font-family="'Lexend', 'Segoe UI', sans-serif" font-size="5.5" font-weight="500" fill="#e2e8f0" text-anchor="middle" letter-spacing="0.2">CENTRAL REGION • REPUBLIC OF KENYA</text>
+</svg>

@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { PublicService } from '@/types';
 import { OFFICIAL_SERVICES } from '@/lib/services-data';
-import { Search, MapPin, Building, ArrowRight, CheckCircle2 } from 'lucide-react';
+import countyLogosManifest from '@/lib/county-logos-manifest.json';
+import { Search, MapPin, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 interface CountiesViewProps {
   onSelectService: (service: PublicService) => void;
@@ -12,59 +13,62 @@ interface CountiesViewProps {
 
 interface CountyEntry {
   code: string;
+  slug: string;
   name: string;
   headquarters: string;
   region: string;
 }
 
+const COUNTY_LOGOS: Record<string, string> = countyLogosManifest;
+
 const ALL_COUNTIES: CountyEntry[] = [
-  { code: '001', name: 'Mombasa County', headquarters: 'Mombasa (Treasury Square)', region: 'Coast' },
-  { code: '002', name: 'Kwale County', headquarters: 'Kwale', region: 'Coast' },
-  { code: '003', name: 'Kilifi County', headquarters: 'Kilifi', region: 'Coast' },
-  { code: '004', name: 'Tana River County', headquarters: 'Hola', region: 'Coast' },
-  { code: '005', name: 'Lamu County', headquarters: 'Lamu Town', region: 'Coast' },
-  { code: '006', name: 'Taita Taveta County', headquarters: 'Mwatate', region: 'Coast' },
-  { code: '007', name: 'Garissa County', headquarters: 'Garissa', region: 'North Eastern' },
-  { code: '008', name: 'Wajir County', headquarters: 'Wajir', region: 'North Eastern' },
-  { code: '009', name: 'Mandera County', headquarters: 'Mandera', region: 'North Eastern' },
-  { code: '010', name: 'Marsabit County', headquarters: 'Marsabit', region: 'Eastern' },
-  { code: '011', name: 'Isiolo County', headquarters: 'Isiolo', region: 'Eastern' },
-  { code: '012', name: 'Meru County', headquarters: 'Meru', region: 'Eastern' },
-  { code: '013', name: 'Tharaka Nithi County', headquarters: 'Kathwana', region: 'Eastern' },
-  { code: '014', name: 'Embu County', headquarters: 'Embu', region: 'Eastern' },
-  { code: '015', name: 'Kitui County', headquarters: 'Kitui', region: 'Eastern' },
-  { code: '016', name: 'Machakos County', headquarters: 'Machakos (White House)', region: 'Eastern' },
-  { code: '017', name: 'Makueni County', headquarters: 'Wote', region: 'Eastern' },
-  { code: '018', name: 'Nyandarua County', headquarters: 'Ol Kalou', region: 'Central' },
-  { code: '019', name: 'Nyeri County', headquarters: 'Nyeri', region: 'Central' },
-  { code: '020', name: 'Kirinyaga County', headquarters: 'Kerugoya', region: 'Central' },
-  { code: '021', name: 'Murang\'a County', headquarters: 'Murang\'a', region: 'Central' },
-  { code: '022', name: 'Kiambu County', headquarters: 'Kiambu / Thika', region: 'Central' },
-  { code: '023', name: 'Turkana County', headquarters: 'Lodwar', region: 'Rift Valley' },
-  { code: '024', name: 'West Pokot County', headquarters: 'Kapenguria', region: 'Rift Valley' },
-  { code: '025', name: 'Samburu County', headquarters: 'Maralal', region: 'Rift Valley' },
-  { code: '026', name: 'Trans Nzoia County', headquarters: 'Kitale', region: 'Rift Valley' },
-  { code: '027', name: 'Uasin Gishu County', headquarters: 'Eldoret City', region: 'Rift Valley' },
-  { code: '028', name: 'Elgeyo Marakwet County', headquarters: 'Iten', region: 'Rift Valley' },
-  { code: '029', name: 'Nandi County', headquarters: 'Kapsabet', region: 'Rift Valley' },
-  { code: '030', name: 'Baringo County', headquarters: 'Kabarnet', region: 'Rift Valley' },
-  { code: '031', name: 'Laikipia County', headquarters: 'Rumuruti / Nanyuki', region: 'Rift Valley' },
-  { code: '032', name: 'Nakuru County', headquarters: 'Nakuru City', region: 'Rift Valley' },
-  { code: '033', name: 'Narok County', headquarters: 'Narok', region: 'Rift Valley' },
-  { code: '034', name: 'Kajiado County', headquarters: 'Kajiado', region: 'Rift Valley' },
-  { code: '035', name: 'Kericho County', headquarters: 'Kericho', region: 'Rift Valley' },
-  { code: '036', name: 'Bomet County', headquarters: 'Bomet', region: 'Rift Valley' },
-  { code: '037', name: 'Kakamega County', headquarters: 'Kakamega', region: 'Western' },
-  { code: '038', name: 'Vihiga County', headquarters: 'Mbale', region: 'Western' },
-  { code: '039', name: 'Bungoma County', headquarters: 'Bungoma', region: 'Western' },
-  { code: '040', name: 'Busia County', headquarters: 'Busia', region: 'Western' },
-  { code: '041', name: 'Siaya County', headquarters: 'Siaya', region: 'Nyanza' },
-  { code: '042', name: 'Kisumu County', headquarters: 'Kisumu City (Prosperity House)', region: 'Nyanza' },
-  { code: '043', name: 'Homa Bay County', headquarters: 'Homa Bay', region: 'Nyanza' },
-  { code: '044', name: 'Migori County', headquarters: 'Migori', region: 'Nyanza' },
-  { code: '045', name: 'Kisii County', headquarters: 'Kisii', region: 'Nyanza' },
-  { code: '046', name: 'Nyamira County', headquarters: 'Nyamira', region: 'Nyanza' },
-  { code: '047', name: 'Nairobi City County', headquarters: 'Nairobi (City Hall)', region: 'Nairobi' }
+  { code: '001', slug: 'mombasa', name: 'Mombasa County', headquarters: 'Mombasa (Treasury Square)', region: 'Coast' },
+  { code: '002', slug: 'kwale', name: 'Kwale County', headquarters: 'Kwale', region: 'Coast' },
+  { code: '003', slug: 'kilifi', name: 'Kilifi County', headquarters: 'Kilifi', region: 'Coast' },
+  { code: '004', slug: 'tana-river', name: 'Tana River County', headquarters: 'Hola', region: 'Coast' },
+  { code: '005', slug: 'lamu', name: 'Lamu County', headquarters: 'Lamu Town', region: 'Coast' },
+  { code: '006', slug: 'taita-taveta', name: 'Taita Taveta County', headquarters: 'Mwatate', region: 'Coast' },
+  { code: '007', slug: 'garissa', name: 'Garissa County', headquarters: 'Garissa', region: 'North Eastern' },
+  { code: '008', slug: 'wajir', name: 'Wajir County', headquarters: 'Wajir', region: 'North Eastern' },
+  { code: '009', slug: 'mandera', name: 'Mandera County', headquarters: 'Mandera', region: 'North Eastern' },
+  { code: '010', slug: 'marsabit', name: 'Marsabit County', headquarters: 'Marsabit', region: 'Eastern' },
+  { code: '011', slug: 'isiolo', name: 'Isiolo County', headquarters: 'Isiolo', region: 'Eastern' },
+  { code: '012', slug: 'meru', name: 'Meru County', headquarters: 'Meru', region: 'Eastern' },
+  { code: '013', slug: 'tharaka-nithi', name: 'Tharaka Nithi County', headquarters: 'Kathwana', region: 'Eastern' },
+  { code: '014', slug: 'embu', name: 'Embu County', headquarters: 'Embu', region: 'Eastern' },
+  { code: '015', slug: 'kitui', name: 'Kitui County', headquarters: 'Kitui', region: 'Eastern' },
+  { code: '016', slug: 'machakos', name: 'Machakos County', headquarters: 'Machakos (White House)', region: 'Eastern' },
+  { code: '017', slug: 'makueni', name: 'Makueni County', headquarters: 'Wote', region: 'Eastern' },
+  { code: '018', slug: 'nyandarua', name: 'Nyandarua County', headquarters: 'Ol Kalou', region: 'Central' },
+  { code: '019', slug: 'nyeri', name: 'Nyeri County', headquarters: 'Nyeri', region: 'Central' },
+  { code: '020', slug: 'kirinyaga', name: 'Kirinyaga County', headquarters: 'Kerugoya', region: 'Central' },
+  { code: '021', slug: 'muranga', name: 'Murang\'a County', headquarters: 'Murang\'a', region: 'Central' },
+  { code: '022', slug: 'kiambu', name: 'Kiambu County', headquarters: 'Kiambu / Thika', region: 'Central' },
+  { code: '023', slug: 'turkana', name: 'Turkana County', headquarters: 'Lodwar', region: 'Rift Valley' },
+  { code: '024', slug: 'west-pokot', name: 'West Pokot County', headquarters: 'Kapenguria', region: 'Rift Valley' },
+  { code: '025', slug: 'samburu', name: 'Samburu County', headquarters: 'Maralal', region: 'Rift Valley' },
+  { code: '026', slug: 'trans-nzoia', name: 'Trans Nzoia County', headquarters: 'Kitale', region: 'Rift Valley' },
+  { code: '027', slug: 'uasin-gishu', name: 'Uasin Gishu County', headquarters: 'Eldoret City', region: 'Rift Valley' },
+  { code: '028', slug: 'elgeyo-marakwet', name: 'Elgeyo Marakwet County', headquarters: 'Iten', region: 'Rift Valley' },
+  { code: '029', slug: 'nandi', name: 'Nandi County', headquarters: 'Kapsabet', region: 'Rift Valley' },
+  { code: '030', slug: 'baringo', name: 'Baringo County', headquarters: 'Kabarnet', region: 'Rift Valley' },
+  { code: '031', slug: 'laikipia', name: 'Laikipia County', headquarters: 'Rumuruti / Nanyuki', region: 'Rift Valley' },
+  { code: '032', slug: 'nakuru', name: 'Nakuru County', headquarters: 'Nakuru City', region: 'Rift Valley' },
+  { code: '033', slug: 'narok', name: 'Narok County', headquarters: 'Narok', region: 'Rift Valley' },
+  { code: '034', slug: 'kajiado', name: 'Kajiado County', headquarters: 'Kajiado', region: 'Rift Valley' },
+  { code: '035', slug: 'kericho', name: 'Kericho County', headquarters: 'Kericho', region: 'Rift Valley' },
+  { code: '036', slug: 'bomet', name: 'Bomet County', headquarters: 'Bomet', region: 'Rift Valley' },
+  { code: '037', slug: 'kakamega', name: 'Kakamega County', headquarters: 'Kakamega', region: 'Western' },
+  { code: '038', slug: 'vihiga', name: 'Vihiga County', headquarters: 'Mbale', region: 'Western' },
+  { code: '039', slug: 'bungoma', name: 'Bungoma County', headquarters: 'Bungoma', region: 'Western' },
+  { code: '040', slug: 'busia', name: 'Busia County', headquarters: 'Busia', region: 'Western' },
+  { code: '041', slug: 'siaya', name: 'Siaya County', headquarters: 'Siaya', region: 'Nyanza' },
+  { code: '042', slug: 'kisumu', name: 'Kisumu County', headquarters: 'Kisumu City (Prosperity House)', region: 'Nyanza' },
+  { code: '043', slug: 'homa-bay', name: 'Homa Bay County', headquarters: 'Homa Bay', region: 'Nyanza' },
+  { code: '044', slug: 'migori', name: 'Migori County', headquarters: 'Migori', region: 'Nyanza' },
+  { code: '045', slug: 'kisii', name: 'Kisii County', headquarters: 'Kisii', region: 'Nyanza' },
+  { code: '046', slug: 'nyamira', name: 'Nyamira County', headquarters: 'Nyamira', region: 'Nyanza' },
+  { code: '047', slug: 'nairobi', name: 'Nairobi City County', headquarters: 'Nairobi (City Hall)', region: 'Nairobi' }
 ];
 
 export default function CountiesView({
@@ -157,56 +161,67 @@ export default function CountiesView({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filtered.map((county) => (
-            <div
-              key={county.code}
-              className="bg-white border border-gray-200 rounded-3xl p-6 hover:shadow-md hover:border-gray-300 transition-all flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 rounded-2xl bg-[#008751]/10 text-[#008751] flex items-center justify-center font-bold text-sm">
-                    {county.code}
-                  </div>
-                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-700">
-                    {county.region}
-                  </span>
-                </div>
-
-                <h3 className="text-base font-bold text-gray-900 mb-1">
-                  {county.name}
-                </h3>
-
-                <div className="flex items-center space-x-1.5 text-xs text-gray-500 mb-4">
-                  <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                  <span>HQ: {county.headquarters}</span>
-                </div>
-
-                <div className="pt-3 border-t border-gray-100 space-y-1.5 mb-5 text-xs text-gray-600">
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#008751] shrink-0" />
-                    <span>Single Business Permit (SBP)</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#008751] shrink-0" />
-                    <span>County Land Rates Clearance</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#008751] shrink-0" />
-                    <span>Daily &amp; Seasonal Parking</span>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleApplyCountyService}
-                className="w-full py-2.5 px-4 rounded-2xl border border-gray-200 hover:border-[#008751] text-gray-900 hover:text-[#008751] text-xs font-semibold flex items-center justify-center space-x-1.5 transition-colors"
+          {filtered.map((county) => {
+            const logoPath = COUNTY_LOGOS[county.code] || `/logos/counties/${county.code}-${county.slug}.svg`;
+            return (
+              <div
+                key={county.code}
+                className="bg-white border border-gray-200 rounded-3xl p-6 hover:shadow-md hover:border-gray-300 transition-all flex flex-col justify-between"
               >
-                <span>Apply for County Service</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ))}
+                <div>
+                  <div className="flex items-center space-x-3.5 mb-4">
+                    <img
+                      src={logoPath}
+                      alt={county.name}
+                      className="w-16 h-16 object-contain rounded-2xl shadow-2xs border border-gray-100 bg-white p-1 shrink-0"
+                    />
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xs font-bold text-[#008751] uppercase tracking-wider">
+                          County {county.code}
+                        </span>
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                          {county.region}
+                        </span>
+                      </div>
+                      <h3 className="text-base font-bold text-gray-900 leading-snug mt-0.5">
+                        {county.name}
+                      </h3>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-1.5 text-xs text-gray-500 mb-4 pl-0.5">
+                    <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                    <span>HQ: {county.headquarters}</span>
+                  </div>
+
+                  <div className="pt-3 border-t border-gray-100 space-y-1.5 mb-5 text-xs text-gray-600">
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#008751] shrink-0" />
+                      <span>Single Business Permit (SBP)</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#008751] shrink-0" />
+                      <span>County Land Rates Clearance</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#008751] shrink-0" />
+                      <span>Daily &amp; Seasonal Parking</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleApplyCountyService}
+                  className="w-full py-2.5 px-4 rounded-2xl border border-gray-200 hover:border-[#008751] text-gray-900 hover:text-[#008751] text-xs font-semibold flex items-center justify-center space-x-1.5 transition-colors"
+                >
+                  <span>Apply for County Service</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
