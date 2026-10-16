@@ -123,11 +123,20 @@ export default function PublicVerificationModal({
           {matchedRequest ? (
             <div className="bg-white border-2 border-[#006633] rounded-md overflow-hidden">
               <div className="bg-[#006633] text-white p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-amber-300" />
-                  <h3 className="text-sm font-bold text-white">
-                    Official Government Record Verified
-                  </h3>
+                <div className="flex items-center gap-3">
+                  <img
+                    src={`/logos/${matchedRequest.agencyCode.toLowerCase()}.png`}
+                    alt={matchedRequest.agencyCode}
+                    className="h-10 w-10 object-contain p-0.5 rounded-sm bg-white"
+                  />
+                  <div>
+                    <h3 className="text-sm font-bold text-white">
+                      Official Government Record Verified
+                    </h3>
+                    <span className="text-[11px] text-emerald-200">
+                      {matchedRequest.agencyCode} Portal Register
+                    </span>
+                  </div>
                 </div>
 
                 <span className="text-xs font-semibold text-white">

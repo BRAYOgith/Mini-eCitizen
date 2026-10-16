@@ -320,13 +320,20 @@ export default function ApplicationWizard({
         </div>
 
         <div className="flex items-start justify-between gap-4">
-          <div>
-            <span className="text-xs text-emerald-200 uppercase font-semibold block">
-              {service.agencyName}
-            </span>
-            <h1 className="text-xl sm:text-2xl font-bold text-white">
-              {service.name}
-            </h1>
+          <div className="flex items-center gap-3">
+            <img
+              src={service.logoUrl}
+              alt={service.agencyName}
+              className="h-12 w-12 object-contain p-1 rounded-sm bg-white shrink-0"
+            />
+            <div>
+              <span className="text-xs text-emerald-200 uppercase font-semibold block">
+                {service.agencyName}
+              </span>
+              <h1 className="text-xl sm:text-2xl font-bold text-white">
+                {service.name}
+              </h1>
+            </div>
           </div>
           <div className="text-right shrink-0">
             <span className="text-[11px] text-emerald-200 uppercase block font-semibold">

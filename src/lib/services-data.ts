@@ -19,6 +19,7 @@ export const OFFICIAL_SERVICES: PublicService[] = [
     category: 'Law Enforcement & Judiciary',
     statutoryFee: 1050,
     processingTimeDays: 7,
+    logoUrl: '/logos/dci.png',
     description: 'Statutory vetting and issuance of electronic police clearance certificate confirming absence of criminal conviction records.',
     requirements: [
       'Original Kenyan National Identity Card',
@@ -52,6 +53,7 @@ export const OFFICIAL_SERVICES: PublicService[] = [
     category: 'Transport & Motoring',
     statutoryFee: 3050,
     processingTimeDays: 5,
+    logoUrl: '/logos/ntsa.png',
     description: 'Issuance and renewal of biometric digital Smart Driving License equipped with electronic chip and point-demerit security.',
     requirements: [
       'National Identity Card',
@@ -92,6 +94,7 @@ export const OFFICIAL_SERVICES: PublicService[] = [
     category: 'Business & Commercial',
     statutoryFee: 950,
     processingTimeDays: 3,
+    logoUrl: '/logos/brs.png',
     description: 'Official enterprise name reservation and statutory issuance of Certificate of Registration under the Business Names Act.',
     requirements: [
       'National ID Copies of all Proprietors / Partners',
@@ -139,6 +142,7 @@ export const OFFICIAL_SERVICES: PublicService[] = [
     category: 'Civil Status & Identity',
     statutoryFee: 150,
     processingTimeDays: 4,
+    logoUrl: '/logos/crs.png',
     description: 'Issuance of official birth certificate or certified replacement copy from the National Civil Registry records.',
     requirements: [
       'Hospital Birth Notification card / Form 1',
@@ -186,6 +190,7 @@ export const OFFICIAL_SERVICES: PublicService[] = [
     category: 'Citizenship & Travel Documents',
     statutoryFee: 7550,
     processingTimeDays: 14,
+    logoUrl: '/logos/immigration.png',
     description: 'Application and biometric clearance for standard 34-page East African Community biometric Kenyan passport.',
     requirements: [
       'Original Birth Certificate and photocopy',

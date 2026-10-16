@@ -53,11 +53,18 @@ export default function DigitalCertificateModal({
 
         <div className="p-8 sm:p-12 relative bg-white">
           <div className="text-center border-b-2 border-gray-800 pb-5 mb-6">
-            <img
-              src="/ecitizen-logo.png"
-              alt="eCitizen Official Logo"
-              className="h-14 w-auto mx-auto mb-2 object-contain"
-            />
+            <div className="flex items-center justify-center gap-4 mb-2">
+              <img
+                src="/ecitizen-logo.png"
+                alt="eCitizen Official Logo"
+                className="h-14 w-auto object-contain"
+              />
+              <img
+                src={`/logos/${request.agencyCode.toLowerCase()}.png`}
+                alt={`${request.agencyCode} Official Emblem`}
+                className="h-14 w-auto object-contain"
+              />
+            </div>
 
             <span className="text-xs font-bold tracking-widest uppercase text-gray-700 block mb-1">
               REPUBLIC OF KENYA

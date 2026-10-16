@@ -14,6 +14,7 @@ export interface PublicService {
   requirements: string[];
   serviceSpecificFields: ServiceFieldDefinition[];
   requiredDocumentName: string;
+  logoUrl: string;
 }
 
 export interface ServiceFieldDefinition {
