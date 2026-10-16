@@ -1,7 +1,9 @@
-import { ServiceRequest, ApplicationStatus, OfficerReviewRecord, OfficerAccount } from '@/types';
+import { ServiceRequest, ApplicationStatus, OfficerReviewRecord, OfficerAccount, CitizenAccount } from '@/types';
 
 const STORAGE_KEY = 'mini_ecitizen_requests_v2';
 const OFFICER_SESSION_KEY = 'mini_ecitizen_officer_session';
+const CITIZEN_SESSION_KEY = 'mini_ecitizen_citizen_session';
+const CITIZENS_DB_KEY = 'mini_ecitizen_citizens_db';
 
 export function getStoredRequests(): ServiceRequest[] {
   if (typeof window === 'undefined') {
@@ -81,6 +83,50 @@ export function setStoredOfficerSession(officer: OfficerAccount | null): void {
   } else {
     localStorage.setItem(OFFICER_SESSION_KEY, JSON.stringify(officer));
   }
+}
+
+export function getStoredCitizenSession(): CitizenAccount | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(CITIZEN_SESSION_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+export function setStoredCitizenSession(citizen: CitizenAccount | null): void {
+  if (typeof window === 'undefined') return;
+  if (!citizen) {
+    localStorage.removeItem(CITIZEN_SESSION_KEY);
+  } else {
+    localStorage.setItem(CITIZEN_SESSION_KEY, JSON.stringify(citizen));
+  }
+}
+
+export function getRegisteredCitizens(): CitizenAccount[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(CITIZENS_DB_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveRegisteredCitizen(account: CitizenAccount): void {
+  if (typeof window === 'undefined') return;
+  const list = getRegisteredCitizens();
+  const existingIdx = list.findIndex(c => c.nationalId === account.nationalId || c.email === account.email);
+  if (existingIdx >= 0) {
+    list[existingIdx] = account;
+  } else {
+    list.push(account);
+  }
+  localStorage.setItem(CITIZENS_DB_KEY, JSON.stringify(list));
 }
 
 export function clearDatabase(): ServiceRequest[] {

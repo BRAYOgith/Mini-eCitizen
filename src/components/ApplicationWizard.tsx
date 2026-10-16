@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { PublicService, ServiceRequest, CitizenBiodata } from '@/types';
+import { PublicService, ServiceRequest, CitizenBiodata, CitizenAccount } from '@/types';
 import { KENYA_COUNTIES } from '@/lib/services-data';
 import {
   sanitizeInput,
@@ -26,20 +26,22 @@ interface ApplicationWizardProps {
   service: PublicService;
   onCancel: () => void;
   onSubmitSuccess: (newRequest: ServiceRequest) => void;
+  authenticatedCitizen?: CitizenAccount | null;
 }
 
 export default function ApplicationWizard({
   service,
   onCancel,
-  onSubmitSuccess
+  onSubmitSuccess,
+  authenticatedCitizen
 }: ApplicationWizardProps) {
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [biodata, setBiodata] = useState<CitizenBiodata>({
-    nationalId: '',
-    fullName: '',
-    phoneNumber: '',
-    email: '',
-    county: 'Nairobi',
+    nationalId: authenticatedCitizen?.nationalId || '',
+    fullName: authenticatedCitizen?.fullName || '',
+    phoneNumber: authenticatedCitizen?.phoneNumber || '',
+    email: authenticatedCitizen?.email || '',
+    county: authenticatedCitizen?.county || 'Nairobi',
     subCounty: '',
     dateOfBirth: ''
   });

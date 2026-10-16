@@ -1,7 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { PublicService, ServiceRequest, ApplicationStatus, OfficerReviewRecord, OfficerAccount } from '@/types';
+import {
+  PublicService,
+  ServiceRequest,
+  ApplicationStatus,
+  OfficerReviewRecord,
+  OfficerAccount,
+  CitizenAccount
+} from '@/types';
 import { OFFICIAL_SERVICES } from '@/lib/services-data';
 import {
   getStoredRequests,
@@ -9,6 +16,8 @@ import {
   updateRequestReview,
   getStoredOfficerSession,
   setStoredOfficerSession,
+  getStoredCitizenSession,
+  setStoredCitizenSession,
   clearDatabase
 } from '@/lib/storage';
 import Navbar from '@/components/Navbar';
@@ -17,6 +26,10 @@ import ApplicationWizard from '@/components/ApplicationWizard';
 import ApplicationTracker from '@/components/ApplicationTracker';
 import OfficerDashboard from '@/components/OfficerDashboard';
 import OfficerAuth from '@/components/OfficerAuth';
+import CitizenAuth from '@/components/CitizenAuth';
+import NationalMinistriesView from '@/components/NationalMinistriesView';
+import CountiesView from '@/components/CountiesView';
+import HelpSupportView from '@/components/HelpSupportView';
 import DigitalCertificateModal from '@/components/DigitalCertificateModal';
 import PublicVerificationModal from '@/components/PublicVerificationModal';
 import {
@@ -38,8 +51,10 @@ import {
 
 export default function Home() {
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
-  const [currentView, setCurrentView] = useState<'catalog' | 'apply' | 'track' | 'officer' | 'officer-auth' | 'verify'>('catalog');
+  const [currentView, setCurrentView] = useState<'catalog' | 'apply' | 'track' | 'officer' | 'officer-auth' | 'verify' | 'citizen-auth' | 'national' | 'counties' | 'support'>('catalog');
+  const [citizenAuthMode, setCitizenAuthMode] = useState<'login' | 'register'>('login');
   const [selectedService, setSelectedService] = useState<PublicService | null>(null);
+  const [authenticatedCitizen, setAuthenticatedCitizen] = useState<CitizenAccount | null>(null);
   const [authenticatedOfficer, setAuthenticatedOfficer] = useState<OfficerAccount | null>(null);
   const [activeCertificateRequest, setActiveCertificateRequest] = useState<ServiceRequest | null>(null);
   const [verificationInitialQuery, setVerificationInitialQuery] = useState<string>('');
@@ -49,6 +64,9 @@ export default function Home() {
   useEffect(() => {
     const loadedRequests = getStoredRequests();
     setRequests(loadedRequests);
+
+    const storedCitizen = getStoredCitizenSession();
+    setAuthenticatedCitizen(storedCitizen);
 
     const storedOfficer = getStoredOfficerSession();
     setAuthenticatedOfficer(storedOfficer);
@@ -92,6 +110,17 @@ export default function Home() {
       setRequests(cleared);
       alert('All applications cleared. Database is now completely empty.');
     }
+  };
+
+  const handleCitizenLogin = (citizen: CitizenAccount) => {
+    setAuthenticatedCitizen(citizen);
+    setStoredCitizenSession(citizen);
+    setCurrentView('catalog');
+  };
+
+  const handleCitizenSignOut = () => {
+    setAuthenticatedCitizen(null);
+    setStoredCitizenSession(null);
   };
 
   const handleOfficerLogin = (officer: OfficerAccount) => {
@@ -140,14 +169,19 @@ export default function Home() {
     <div className="min-h-screen bg-white flex flex-col font-lexend text-gray-900">
       <Navbar
         currentView={currentView}
-        onNavigate={(view) => {
-          if (view === 'officer' && !authenticatedOfficer) {
+        onNavigate={(view, authMode) => {
+          if (view === 'citizen-auth') {
+            setCitizenAuthMode(authMode || 'login');
+            setCurrentView('citizen-auth');
+          } else if (view === 'officer' && !authenticatedOfficer) {
             setCurrentView('officer-auth');
           } else {
             setCurrentView(view);
           }
           if (view !== 'apply') setSelectedService(null);
         }}
+        authenticatedCitizen={authenticatedCitizen}
+        onCitizenSignOut={handleCitizenSignOut}
         authenticatedOfficer={authenticatedOfficer}
         onClearData={handleClearData}
         pendingRequestsCount={pendingCount}
@@ -326,11 +360,8 @@ export default function Home() {
                       <div className="flex space-x-3 items-center mt-3 sm:mt-0">
                         <button
                           onClick={() => {
-                            if (authenticatedOfficer) {
-                              setCurrentView('officer');
-                            } else {
-                              setCurrentView('officer-auth');
-                            }
+                            setCitizenAuthMode('login');
+                            setCurrentView('citizen-auth');
                           }}
                           className="rounded-3xl bg-white text-gray-800 hover:bg-gray-100 px-5 py-2 text-sm font-medium transition-colors"
                         >
@@ -338,11 +369,8 @@ export default function Home() {
                         </button>
                         <button
                           onClick={() => {
-                            if (!authenticatedOfficer) {
-                              setCurrentView('officer-auth');
-                            } else {
-                              setCurrentView('officer');
-                            }
+                            setCitizenAuthMode('register');
+                            setCurrentView('citizen-auth');
                           }}
                           className="rounded-3xl bg-[#008751] hover:bg-[#007043] text-white px-5 py-2 text-sm font-medium transition-colors"
                         >
@@ -361,7 +389,7 @@ export default function Home() {
                   Agencies
                 </h2>
                 <button
-                  onClick={() => setSearchQuery('')}
+                  onClick={() => setCurrentView('national')}
                   className="text-sm font-semibold text-blue-600 hover:underline flex items-center space-x-1"
                 >
                   <span>View all agencies</span>
@@ -500,9 +528,41 @@ export default function Home() {
           </div>
         )}
 
+        {currentView === 'national' && (
+          <NationalMinistriesView
+            onSelectService={handleSelectService}
+            onBackToHome={() => setCurrentView('catalog')}
+          />
+        )}
+
+        {currentView === 'counties' && (
+          <CountiesView
+            onSelectService={handleSelectService}
+            onBackToHome={() => setCurrentView('catalog')}
+          />
+        )}
+
+        {currentView === 'support' && (
+          <HelpSupportView
+            onBackToHome={() => setCurrentView('catalog')}
+            onNavigateTrack={() => setCurrentView('track')}
+            onNavigateVerify={() => setCurrentView('verify')}
+          />
+        )}
+
+        {currentView === 'citizen-auth' && (
+          <CitizenAuth
+            initialMode={citizenAuthMode}
+            onAuthenticated={handleCitizenLogin}
+            onCancel={() => setCurrentView('catalog')}
+            onSwitchToOfficer={() => setCurrentView('officer-auth')}
+          />
+        )}
+
         {currentView === 'apply' && selectedService && (
           <ApplicationWizard
             service={selectedService}
+            authenticatedCitizen={authenticatedCitizen}
             onCancel={() => {
               setSelectedService(null);
               setCurrentView('catalog');
@@ -592,6 +652,16 @@ export default function Home() {
                     </button>
                   </li>
                   <li>
+                    <button onClick={() => setCurrentView('national')} className="hover:text-white transition-colors">
+                      National Ministries
+                    </button>
+                  </li>
+                  <li>
+                    <button onClick={() => setCurrentView('counties')} className="hover:text-white transition-colors">
+                      47 County Governments
+                    </button>
+                  </li>
+                  <li>
                     <button onClick={() => setCurrentView('track')} className="hover:text-white transition-colors">
                       Track Application
                     </button>
@@ -622,7 +692,9 @@ export default function Home() {
                 <span className="font-semibold text-white block mb-3">Legal & Support</span>
                 <ul className="space-y-2 text-gray-300">
                   <li>
-                    <span className="hover:text-white cursor-pointer">Help &amp; Support</span>
+                    <button onClick={() => setCurrentView('support')} className="hover:text-white transition-colors text-left">
+                      Help &amp; Support
+                    </button>
                   </li>
                   <li>
                     <span className="hover:text-white cursor-pointer">Terms &amp; Conditions</span>

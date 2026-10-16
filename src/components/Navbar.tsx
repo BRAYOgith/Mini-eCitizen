@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, Globe, Accessibility, Trash2, Lock, User, Menu, X } from 'lucide-react';
-import { OfficerAccount } from '@/types';
+import { Search, Globe, Accessibility, Trash2, Lock, LogOut, Menu, X } from 'lucide-react';
+import { OfficerAccount, CitizenAccount } from '@/types';
 
 interface NavbarProps {
-  currentView: 'catalog' | 'apply' | 'track' | 'officer' | 'officer-auth' | 'verify';
-  onNavigate: (view: 'catalog' | 'apply' | 'track' | 'officer' | 'officer-auth' | 'verify') => void;
+  currentView: 'catalog' | 'apply' | 'track' | 'officer' | 'officer-auth' | 'verify' | 'citizen-auth' | 'national' | 'counties' | 'support';
+  onNavigate: (view: 'catalog' | 'apply' | 'track' | 'officer' | 'officer-auth' | 'verify' | 'citizen-auth' | 'national' | 'counties' | 'support', authMode?: 'login' | 'register') => void;
+  authenticatedCitizen: CitizenAccount | null;
+  onCitizenSignOut: () => void;
   authenticatedOfficer: OfficerAccount | null;
   onClearData: () => void;
   pendingRequestsCount: number;
@@ -16,20 +18,14 @@ interface NavbarProps {
 export default function Navbar({
   currentView,
   onNavigate,
+  authenticatedCitizen,
+  onCitizenSignOut,
   authenticatedOfficer,
   onClearData,
   pendingRequestsCount,
   onSearchClick
 }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const handleOfficerClick = () => {
-    if (authenticatedOfficer) {
-      onNavigate('officer');
-    } else {
-      onNavigate('officer-auth');
-    }
-  };
 
   return (
     <header className="bg-white border-b border-gray-100 sticky top-0 z-40 font-lexend">
@@ -54,7 +50,7 @@ export default function Navbar({
             </div>
           </div>
 
-          <nav className="hidden lg:flex items-center space-x-8">
+          <nav className="hidden lg:flex items-center space-x-7">
             <button
               onClick={() => onNavigate('catalog')}
               className={`text-sm font-medium transition-colors ${
@@ -66,16 +62,34 @@ export default function Navbar({
               Home
             </button>
             <button
-              onClick={() => onNavigate('catalog')}
-              className="text-sm font-medium text-gray-700 hover:text-gray-950 transition-colors"
+              onClick={() => onNavigate('national')}
+              className={`text-sm font-medium transition-colors ${
+                currentView === 'national'
+                  ? 'text-gray-950 font-semibold'
+                  : 'text-gray-700 hover:text-gray-950'
+              }`}
             >
               National
             </button>
             <button
-              onClick={() => onNavigate('catalog')}
-              className="text-sm font-medium text-gray-700 hover:text-gray-950 transition-colors"
+              onClick={() => onNavigate('counties')}
+              className={`text-sm font-medium transition-colors ${
+                currentView === 'counties'
+                  ? 'text-gray-950 font-semibold'
+                  : 'text-gray-700 hover:text-gray-950'
+              }`}
             >
               Counties
+            </button>
+            <button
+              onClick={() => onNavigate('support')}
+              className={`text-sm font-medium transition-colors ${
+                currentView === 'support'
+                  ? 'text-gray-950 font-semibold'
+                  : 'text-gray-700 hover:text-gray-950'
+              }`}
+            >
+              Help &amp; Support
             </button>
             <button
               onClick={() => onNavigate('track')}
@@ -110,10 +124,11 @@ export default function Navbar({
               <Search className="w-5 h-5 stroke-[2]" />
             </button>
 
-            {authenticatedOfficer ? (
+            {authenticatedOfficer && (
               <button
-                onClick={handleOfficerClick}
-                className="flex items-center space-x-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-3xl border border-gray-300 text-gray-900 bg-gray-50 hover:bg-gray-100 transition-colors"
+                onClick={() => onNavigate('officer')}
+                className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-3xl border border-gray-300 text-gray-900 bg-gray-50 hover:bg-gray-100 transition-colors"
+                title="Open Officer Clearance Console"
               >
                 <Lock className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Console ({authenticatedOfficer.badgeNumber})</span>
@@ -123,27 +138,43 @@ export default function Navbar({
                   </span>
                 )}
               </button>
-            ) : (
-              <button
-                onClick={handleOfficerClick}
-                className="text-sm font-medium text-gray-800 hover:text-gray-950 px-3 py-2 transition-colors"
-              >
-                Sign in
-              </button>
             )}
 
-            <button
-              onClick={() => {
-                if (!authenticatedOfficer) {
-                  onNavigate('officer-auth');
-                } else {
-                  onNavigate('officer');
-                }
-              }}
-              className="rounded-3xl bg-[#008751] hover:bg-[#007043] text-white px-5 py-2 text-sm font-medium shadow-xs transition-colors"
-            >
-              Register
-            </button>
+            {authenticatedCitizen ? (
+              <div className="flex items-center space-x-2 pl-2 border-l border-gray-200">
+                <div className="flex items-center space-x-2 bg-gray-50 px-3 py-1.5 rounded-3xl border border-gray-200">
+                  <div className="w-6 h-6 rounded-full bg-[#008751] text-white flex items-center justify-center text-xs font-bold">
+                    {authenticatedCitizen.fullName.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-xs font-semibold text-gray-800 max-w-[130px] truncate">
+                    {authenticatedCitizen.fullName.split(' ')[0]}
+                  </span>
+                </div>
+                <button
+                  onClick={onCitizenSignOut}
+                  className="p-2 text-gray-500 hover:text-red-600 rounded-full hover:bg-gray-100 transition-colors"
+                  title="Sign Out"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <>
+                <button
+                  onClick={() => onNavigate('citizen-auth', 'login')}
+                  className="text-sm font-medium text-gray-800 hover:text-gray-950 px-3 py-2 transition-colors"
+                >
+                  Sign in
+                </button>
+
+                <button
+                  onClick={() => onNavigate('citizen-auth', 'register')}
+                  className="rounded-3xl bg-[#008751] hover:bg-[#007043] text-white px-5 py-2 text-sm font-medium shadow-xs transition-colors"
+                >
+                  Register
+                </button>
+              </>
+            )}
 
             <button
               type="button"
@@ -198,6 +229,33 @@ export default function Navbar({
           </button>
           <button
             onClick={() => {
+              onNavigate('national');
+              setMobileMenuOpen(false);
+            }}
+            className="block w-full text-left py-2 text-sm font-medium text-gray-700"
+          >
+            National
+          </button>
+          <button
+            onClick={() => {
+              onNavigate('counties');
+              setMobileMenuOpen(false);
+            }}
+            className="block w-full text-left py-2 text-sm font-medium text-gray-700"
+          >
+            Counties
+          </button>
+          <button
+            onClick={() => {
+              onNavigate('support');
+              setMobileMenuOpen(false);
+            }}
+            className="block w-full text-left py-2 text-sm font-medium text-gray-700"
+          >
+            Help &amp; Support
+          </button>
+          <button
+            onClick={() => {
               onNavigate('track');
               setMobileMenuOpen(false);
             }}
@@ -214,25 +272,58 @@ export default function Navbar({
           >
             Verify Document
           </button>
+
           <div className="pt-3 border-t border-gray-200 flex flex-col space-y-2">
+            {authenticatedCitizen ? (
+              <div className="flex items-center justify-between py-2 text-sm text-gray-800">
+                <span>Signed in as <strong>{authenticatedCitizen.fullName}</strong></span>
+                <button
+                  onClick={() => {
+                    onCitizenSignOut();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="text-red-600 text-xs font-semibold"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    onNavigate('citizen-auth', 'login');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full text-center py-2.5 rounded-3xl border border-gray-300 text-sm font-medium text-gray-800"
+                >
+                  Sign in
+                </button>
+                <button
+                  onClick={() => {
+                    onNavigate('citizen-auth', 'register');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full text-center py-2.5 rounded-3xl bg-[#008751] text-white text-sm font-medium"
+                >
+                  Register
+                </button>
+              </>
+            )}
+
             <button
               onClick={() => {
-                handleOfficerClick();
+                if (authenticatedOfficer) {
+                  onNavigate('officer');
+                } else {
+                  onNavigate('officer-auth');
+                }
                 setMobileMenuOpen(false);
               }}
-              className="w-full text-center py-2.5 rounded-3xl border border-gray-300 text-sm font-medium text-gray-800"
+              className="w-full text-center py-2 text-xs text-gray-600 hover:text-emerald-700 font-medium"
             >
-              {authenticatedOfficer ? `Officer Console (${authenticatedOfficer.badgeNumber})` : 'Sign in'}
+              {authenticatedOfficer ? `Officer Console (${authenticatedOfficer.badgeNumber})` : 'Officer Portal'}
             </button>
-            <button
-              onClick={() => {
-                onNavigate('officer-auth');
-                setMobileMenuOpen(false);
-              }}
-              className="w-full text-center py-2.5 rounded-3xl bg-[#008751] text-white text-sm font-medium"
-            >
-              Register
-            </button>
+
             <button
               onClick={() => {
                 onClearData();

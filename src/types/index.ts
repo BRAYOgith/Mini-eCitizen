@@ -36,6 +36,15 @@ export interface CitizenBiodata {
   dateOfBirth: string;
 }
 
+export interface CitizenAccount {
+  id: string;
+  nationalId: string;
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  county: string;
+}
+
 export interface OfficerAccount {
   id: string;
   badgeNumber: string;
