@@ -286,13 +286,20 @@ export default function Home() {
 
       <footer className="bg-[#1e293b] text-gray-400 text-xs py-8 px-4 sm:px-6 lg:px-8 border-t border-gray-700">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div>
-            <p className="font-semibold text-white">
-              Government of Kenya | eCitizen Portal
-            </p>
-            <p className="text-[11px] text-gray-400 mt-0.5">
-              Public Service Request System
-            </p>
+          <div className="flex items-center gap-3">
+            <img
+              src="/ecitizen-logo.png"
+              alt="eCitizen Logo"
+              className="h-10 w-auto object-contain bg-white p-1 rounded-sm"
+            />
+            <div>
+              <p className="font-semibold text-white">
+                Government of Kenya | eCitizen Portal
+              </p>
+              <p className="text-[11px] text-gray-400 mt-0.5">
+                Public Service Request System
+              </p>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-5 text-xs">

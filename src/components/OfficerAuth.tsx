@@ -79,9 +79,11 @@ export default function OfficerAuth({ onAuthenticated, onCancel }: OfficerAuthPr
   return (
     <div className="max-w-md mx-auto my-10 bg-white border border-gray-300 rounded-md shadow-xs p-6">
       <div className="border-b border-gray-200 pb-3 mb-5 text-center">
-        <div className="w-10 h-10 bg-[#006633] text-white flex items-center justify-center rounded-sm mx-auto mb-2 font-bold">
-          <Lock className="w-5 h-5" />
-        </div>
+        <img
+          src="/ecitizen-logo.png"
+          alt="eCitizen Kenya"
+          className="h-12 w-auto mx-auto mb-2 object-contain"
+        />
         <h2 className="text-base font-bold text-gray-900">
           Government Officer Authentication
         </h2>

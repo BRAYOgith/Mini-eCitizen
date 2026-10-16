@@ -72,16 +72,16 @@ export default function Navbar({
               onClick={() => onNavigate('catalog')}
               className="flex items-center gap-3 cursor-pointer"
             >
-              <div className="w-11 h-11 rounded-sm bg-[#006633] flex items-center justify-center text-white border border-[#004d26] shrink-0">
-                <span className="font-serif font-black text-xl text-amber-300">eC</span>
-              </div>
-              <div>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-2xl font-black text-[#0f172a] tracking-tight">
-                    e<span className="text-[#006633]">Citizen</span>
-                  </span>
-                </div>
-                <p className="text-[11px] text-gray-500 tracking-wider uppercase font-semibold">
+              <img
+                src="/ecitizen-logo.png"
+                alt="eCitizen Kenya Logo"
+                className="h-12 w-auto object-contain"
+              />
+              <div className="hidden sm:block">
+                <span className="text-xl font-bold text-[#0f172a] tracking-tight block">
+                  e<span className="text-[#006633]">Citizen</span>
+                </span>
+                <p className="text-[10px] text-gray-500 tracking-wider uppercase font-semibold">
                   Gateway to All Government Services
                 </p>
               </div>
