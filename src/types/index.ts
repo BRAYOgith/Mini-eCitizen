@@ -1,40 +1,15 @@
-export type ServiceAgency = 'DCI' | 'NTSA' | 'BRS' | 'CRS' | 'IMMIGRATION';
+export type RequestStatus = 'PENDING' | 'IN_PROGRESS' | 'RESOLVED';
 
-export type ApplicationStatus = 'SUBMITTED' | 'UNDER_REVIEW' | 'ACTION_REQUIRED' | 'APPROVED' | 'REJECTED' | 'ISSUED';
+export type ServiceCategory =
+  | 'STREETLIGHT'
+  | 'WATER'
+  | 'GARBAGE'
+  | 'ROAD'
+  | 'SEWERAGE'
+  | 'PUBLIC_HEALTH'
+  | 'OTHER';
 
-export interface PublicService {
-  id: string;
-  code: ServiceAgency;
-  name: string;
-  agencyName: string;
-  category: string;
-  statutoryFee: number;
-  processingTimeDays: number;
-  description: string;
-  requirements: string[];
-  serviceSpecificFields: ServiceFieldDefinition[];
-  requiredDocumentName: string;
-  logoUrl: string;
-}
-
-export interface ServiceFieldDefinition {
-  id: string;
-  label: string;
-  type: 'text' | 'select' | 'date';
-  options?: string[];
-  placeholder?: string;
-  required: boolean;
-}
-
-export interface CitizenBiodata {
-  nationalId: string;
-  fullName: string;
-  phoneNumber: string;
-  email: string;
-  county: string;
-  subCounty: string;
-  dateOfBirth: string;
-}
+export type RequestPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'EMERGENCY';
 
 export interface CitizenAccount {
   id: string;
@@ -54,40 +29,74 @@ export interface OfficerAccount {
   role: string;
 }
 
-export interface OfficerReviewRecord {
-  reviewedAt: string;
-  officerId: string;
+export interface RequestLocation {
+  county: string;
+  subCounty: string;
+  ward: string;
+  streetOrLandmark: string;
+}
+
+export interface AdminResolution {
   officerName: string;
+  officerBadge: string;
+  updatedStatus: RequestStatus;
   notes: string;
-  decision: ApplicationStatus;
+  resolvedAt?: string;
+  assignedTeam?: string;
 }
 
 export interface ServiceRequest {
   id: string;
   referenceNumber: string;
-  serviceId: string;
-  serviceName: string;
-  agencyCode: ServiceAgency;
-  statutoryFee: number;
-  status: ApplicationStatus;
+  category: ServiceCategory;
+  categoryLabel: string;
+  title: string;
+  description: string;
+  location: RequestLocation;
+  priority: RequestPriority;
+  imageUrl?: string;
+  imageName?: string;
+  status: RequestStatus;
   submittedAt: string;
   updatedAt: string;
-  applicant: CitizenBiodata;
-  serviceData: Record<string, string>;
-  documentName?: string;
-  documentDataUrl?: string;
-  reviewRecord?: OfficerReviewRecord;
-  certificate?: {
-    certificateNumber: string;
-    issuedAt: string;
-    expiresAt?: string;
-    securityChecksum: string;
+  applicant: {
+    fullName: string;
+    nationalId: string;
+    email: string;
+    phoneNumber: string;
   };
+  adminFeedback?: AdminResolution;
 }
 
-export interface VerificationLookupResult {
-  found: boolean;
-  tamperProofVerified: boolean;
-  request?: ServiceRequest;
-  message: string;
+export interface CategoryDefinition {
+  id: ServiceCategory;
+  label: string;
+  description: string;
+  department: string;
+  iconName: string;
+  estimatedResolutionDays: number;
+}
+
+export interface PublicService {
+  id: string;
+  name: string;
+  code: string;
+  agencyName: string;
+  agencyCode: string;
+  description: string;
+  category: ServiceCategory;
+  categoryLabel?: string;
+  iconName: string;
+  statutoryFee?: number;
+  processingDays?: number;
+  logoUrl?: string;
+}
+
+export interface AnalyticsSummary {
+  totalRequests: number;
+  openCases: number;
+  inProgressCases: number;
+  resolvedCases: number;
+  resolutionRate: number;
+  categoryCounts: Record<ServiceCategory, number>;
 }

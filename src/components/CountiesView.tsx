@@ -180,8 +180,8 @@ export default function CountiesView({
                         <span className="text-xs font-bold text-[#008751] uppercase tracking-wider">
                           County {county.code}
                         </span>
-                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
-                          {county.region}
+                        <span className="text-[10px] text-gray-500 font-normal">
+                          &bull; {county.region}
                         </span>
                       </div>
                       <h3 className="text-base font-bold text-gray-900 leading-snug mt-0.5">

@@ -3,26 +3,28 @@
 import React, { useState } from 'react';
 import { ServiceRequest } from '@/types';
 import {
-  FileCheck2,
   Search,
   CheckCircle2,
-  XCircle,
-  AlertTriangle,
-  ArrowRight
+  AlertCircle,
+  Clock,
+  ArrowRight,
+  MapPin,
+  Calendar,
+  Wrench,
+  ShieldCheck,
+  Building2
 } from 'lucide-react';
 
 interface PublicVerificationProps {
   requests: ServiceRequest[];
   initialSearchQuery?: string;
   onClose?: () => void;
-  onViewCertificate?: (req: ServiceRequest) => void;
 }
 
 export default function PublicVerificationModal({
   requests,
   initialSearchQuery = '',
-  onClose,
-  onViewCertificate
+  onClose
 }: PublicVerificationProps) {
   const [query, setQuery] = useState(initialSearchQuery);
   const [hasSearched, setHasSearched] = useState(Boolean(initialSearchQuery));
@@ -30,9 +32,7 @@ export default function PublicVerificationModal({
     if (!initialSearchQuery) return null;
     return (
       requests.find(
-        (r) =>
-          r.referenceNumber.toLowerCase() === initialSearchQuery.toLowerCase() ||
-          r.certificate?.certificateNumber.toLowerCase() === initialSearchQuery.toLowerCase()
+        (r) => r.referenceNumber.toLowerCase() === initialSearchQuery.toLowerCase()
       ) || null
     );
   });
@@ -44,9 +44,7 @@ export default function PublicVerificationModal({
 
     setHasSearched(true);
     const found = requests.find(
-      (r) =>
-        r.referenceNumber.toLowerCase() === clean ||
-        r.certificate?.certificateNumber.toLowerCase() === clean
+      (r) => r.referenceNumber.toLowerCase() === clean
     );
     setMatchedRequest(found || null);
   };
@@ -59,33 +57,39 @@ export default function PublicVerificationModal({
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 font-lexend">
       <div className="mb-6 border-b border-gray-200 pb-4">
+        <div className="flex items-center gap-2 mb-1">
+          <ShieldCheck className="w-5 h-5 text-[#006633]" />
+          <span className="text-xs uppercase font-bold tracking-wider text-emerald-800">
+            Public Registry Verification
+          </span>
+        </div>
         <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-          Document Verification Portal
+          Official Request Verification Portal
         </h1>
         <p className="text-xs text-gray-500 mt-1">
-          Verify public service documents and certificates issued via the Government of Kenya eCitizen system.
+          Verify authentic public service incident reports, municipal dispatch orders, and resolution records registered on the eCitizen platform.
         </p>
       </div>
 
-      <div className="bg-white border border-gray-300 rounded-md p-5 mb-6">
+      <div className="bg-white border border-gray-300 rounded-xl p-5 mb-6 shadow-xs">
         <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 mb-3">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Enter Reference Number (e.g. ECZ-DCI-2026-839210) or Certificate Serial..."
-              className="w-full pl-9 pr-3 py-2 rounded-md border border-gray-300 text-xs font-mono text-gray-900 focus:outline-hidden focus:border-[#006633] focus:ring-1 focus:ring-[#006633]"
+              placeholder="Enter Reference Number (e.g. REQ-2026-NBI-1042)..."
+              className="w-full pl-9 pr-3 py-2.5 rounded-lg border border-gray-300 text-xs font-mono text-gray-900 focus:outline-hidden focus:border-[#006633] focus:ring-1 focus:ring-[#006633]"
             />
           </div>
           <button
             type="submit"
-            className="px-5 py-2 rounded-md bg-[#006633] hover:bg-[#004d26] text-white text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 shrink-0"
+            className="px-5 py-2.5 rounded-lg bg-[#006633] hover:bg-[#004d26] text-white text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 shrink-0 shadow-xs"
           >
-            <span>Verify Document</span>
+            <span>Verify Request</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </form>
@@ -100,18 +104,18 @@ export default function PublicVerificationModal({
                 setMatchedRequest(r);
                 setHasSearched(true);
               }}
-              className="px-2 py-1 rounded-sm bg-gray-100 hover:bg-gray-200 text-gray-800 font-mono text-[11px] transition-colors border border-gray-200"
+              className="px-2.5 py-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-800 font-mono text-[11px] transition-colors border border-gray-200"
             >
               {r.referenceNumber}
             </button>
           ))}
           <button
             onClick={() => {
-              setQuery('ECZ-FAKE-2026-000000');
+              setQuery('REQ-INVALID-0000');
               setMatchedRequest(null);
               setHasSearched(true);
             }}
-            className="px-2 py-1 rounded-sm bg-red-50 hover:bg-red-100 text-red-700 font-mono text-[11px] transition-colors border border-red-200"
+            className="px-2.5 py-1 rounded bg-red-50 hover:bg-red-100 text-red-700 font-mono text-[11px] transition-colors border border-red-200"
           >
             Test Invalid Code
           </button>
@@ -121,48 +125,63 @@ export default function PublicVerificationModal({
       {hasSearched && (
         <div>
           {matchedRequest ? (
-            <div className="bg-white border-2 border-[#006633] rounded-md overflow-hidden">
-              <div className="bg-[#006633] text-white p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="bg-white border-2 border-[#006633] rounded-xl overflow-hidden shadow-sm">
+              <div className="bg-[#006633] text-white p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <img
-                    src={`/logos/${matchedRequest.agencyCode.toLowerCase()}.png`}
-                    alt={matchedRequest.agencyCode}
-                    className="h-10 w-10 object-contain p-0.5 rounded-sm bg-white"
-                  />
+                  <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                    <CheckCircle2 className="w-6 h-6 text-white" />
+                  </div>
                   <div>
                     <h3 className="text-sm font-bold text-white">
-                      Official Government Record Verified
+                      Official Municipal Record Verified
                     </h3>
-                    <span className="text-[11px] text-emerald-200">
-                      {matchedRequest.agencyCode} Portal Register
+                    <span className="text-[11px] text-emerald-200 font-mono">
+                      Ref: {matchedRequest.referenceNumber}
                     </span>
                   </div>
                 </div>
 
-                <span className="text-xs font-semibold text-white">
-                  Status: {matchedRequest.status}
-                </span>
+                <div>
+                  {matchedRequest.status === 'PENDING' && (
+                    <span className="text-xs font-bold text-amber-700 inline-flex items-center gap-1.5 uppercase tracking-wider">
+                      <AlertCircle className="w-3.5 h-3.5" />
+                      Status: PENDING REVIEW
+                    </span>
+                  )}
+                  {matchedRequest.status === 'IN_PROGRESS' && (
+                    <span className="text-xs font-bold text-blue-700 inline-flex items-center gap-1.5 uppercase tracking-wider">
+                      <Clock className="w-3.5 h-3.5" />
+                      Status: IN PROGRESS
+                    </span>
+                  )}
+                  {matchedRequest.status === 'RESOLVED' && (
+                    <span className="text-xs font-bold text-emerald-700 inline-flex items-center gap-1.5 uppercase tracking-wider">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                      Status: RESOLVED &amp; CLOSED
+                    </span>
+                  )}
+                </div>
               </div>
 
-              <div className="p-5 space-y-4 text-xs text-gray-800">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-gray-50 p-4 rounded-md border border-gray-200">
+              <div className="p-6 space-y-5 text-xs text-gray-800">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
                   <div>
                     <span className="text-gray-500 uppercase text-[10px] font-semibold block">
-                      Service
+                      Category
                     </span>
-                    <span className="font-bold text-gray-900">
-                      {matchedRequest.serviceName}
+                    <span className="font-bold text-gray-900 text-sm">
+                      {matchedRequest.categoryLabel}
                     </span>
-                    <span className="text-gray-600 block text-[11px] mt-0.5">
-                      {matchedRequest.agencyCode} Portal
+                    <span className="text-gray-500 block text-[11px] mt-0.5">
+                      Priority: {matchedRequest.priority}
                     </span>
                   </div>
 
                   <div>
                     <span className="text-gray-500 uppercase text-[10px] font-semibold block">
-                      Applicant
+                      Reporting Citizen
                     </span>
-                    <span className="font-bold text-gray-900">
+                    <span className="font-bold text-gray-900 text-sm">
                       {matchedRequest.applicant.fullName}
                     </span>
                     <span className="text-gray-500 block text-[11px] font-mono mt-0.5">
@@ -172,70 +191,59 @@ export default function PublicVerificationModal({
 
                   <div>
                     <span className="text-gray-500 uppercase text-[10px] font-semibold block">
-                      Reference Code
+                      Incident Location
                     </span>
-                    <span className="font-mono font-bold text-gray-900">
-                      {matchedRequest.referenceNumber}
+                    <span className="font-bold text-gray-900 text-sm">
+                      {matchedRequest.location.county} County
                     </span>
-                    <span className="text-gray-500 block text-[11px] mt-0.5">
-                      Submitted: {new Date(matchedRequest.submittedAt).toLocaleDateString('en-GB')}
+                    <span className="text-gray-500 block text-[11px] mt-0.5 truncate" title={matchedRequest.location.streetOrLandmark}>
+                      {matchedRequest.location.streetOrLandmark}
                     </span>
                   </div>
                 </div>
 
-                {matchedRequest.certificate ? (
-                  <div className="bg-emerald-50 p-4 rounded-md border border-emerald-200 space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-[#006633]">
-                        Certificate Serial: {matchedRequest.certificate.certificateNumber}
-                      </span>
-                      <span className="text-gray-600 text-[11px]">
-                        Issued: {new Date(matchedRequest.certificate.issuedAt).toLocaleDateString('en-GB')}
-                      </span>
-                    </div>
-
-                    <div>
-                      <span className="text-gray-500 block text-[10px]">Tamper-Proof Checksum</span>
-                      <span className="font-mono font-bold text-gray-900">
-                        {matchedRequest.certificate.securityChecksum}
-                      </span>
-                    </div>
-
-                    {onViewCertificate && (
-                      <div className="pt-2">
-                        <button
-                          onClick={() => onViewCertificate(matchedRequest)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#006633] hover:bg-[#004d26] text-white text-xs font-semibold transition-colors"
-                        >
-                          <FileCheck2 className="w-3.5 h-3.5" />
-                          <span>View Official Certificate Document</span>
-                        </button>
-                      </div>
-                    )}
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-1">
+                    Issue Description
+                  </h4>
+                  <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 text-gray-700">
+                    <p className="font-semibold text-gray-900 mb-1">{matchedRequest.title}</p>
+                    <p className="text-gray-600">{matchedRequest.description}</p>
                   </div>
-                ) : (
-                  <div className="bg-amber-50 p-3 rounded-md border border-amber-200 flex items-start gap-2">
-                    <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-bold text-amber-900">Application In Progress</p>
-                      <p className="text-amber-800 text-[11px] mt-0.5">
-                        This request is legitimate and undergoing administrative review ({matchedRequest.status}).
+                </div>
+
+                {matchedRequest.adminFeedback && (
+                  <div className="bg-emerald-50/70 border border-emerald-200 rounded-lg p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-emerald-900 font-bold">
+                      <Wrench className="w-4 h-4 text-emerald-700" />
+                      <span>Official Action &amp; Assigned Unit</span>
+                    </div>
+                    {matchedRequest.adminFeedback.assignedTeam && (
+                      <p className="text-xs text-gray-800">
+                        <strong className="text-gray-900">Assigned Team:</strong> {matchedRequest.adminFeedback.assignedTeam}
                       </p>
+                    )}
+                    {matchedRequest.adminFeedback.notes && (
+                      <p className="text-xs text-gray-700">
+                        <strong className="text-gray-900">Admin Remarks:</strong> {matchedRequest.adminFeedback.notes}
+                      </p>
+                    )}
+                    <div className="text-[11px] text-gray-500 flex items-center gap-3 pt-1">
+                      <span>Officer: {matchedRequest.adminFeedback.officerName}</span>
+                      <span>Badge: {matchedRequest.adminFeedback.officerBadge}</span>
                     </div>
                   </div>
                 )}
               </div>
             </div>
           ) : (
-            <div className="bg-white border-2 border-red-500 rounded-md p-6 text-center">
-              <div className="w-10 h-10 bg-red-100 text-red-700 rounded-md flex items-center justify-center mx-auto mb-2">
-                <XCircle className="w-6 h-6" />
-              </div>
-              <h3 className="text-base font-bold text-gray-900">
-                No Record Found for &ldquo;{query}&rdquo;
+            <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center text-red-800">
+              <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-2" />
+              <h3 className="text-base font-bold text-red-900">
+                Record Not Found in Public Registry
               </h3>
-              <p className="text-xs text-gray-600 mt-1 max-w-md mx-auto">
-                The reference code or certificate serial number provided does not exist in the official eCitizen registry.
+              <p className="text-xs text-red-700 mt-1 max-w-md mx-auto">
+                No active municipal service request matches tracking number &ldquo;{query}&rdquo;. Please verify the reference code format.
               </p>
             </div>
           )}

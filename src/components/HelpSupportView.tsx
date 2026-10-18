@@ -20,8 +20,8 @@ const FAQS: FaqItem[] = [
     answer: 'Navigate to Services or select "Apply for Good Conduct" on the homepage. Complete your biodata, choose your preferred fingerprint station (e.g. DCI Mazingira House or nearest Huduma Centre), select the certificate purpose, and upload your passport photo. Pay the statutory KES 1,050 fee, download your C24 form, and attend your biometric appointment.'
   },
   {
-    question: 'How do I track the real-time progress of my application?',
-    answer: 'Click "Track Application" on the navigation bar. You can view all requests submitted under your citizen session or search using your unique tracking code (e.g., DCI-2026-..., NTSA-2026-...). The tracker shows real-time status steps from Submitted to Under Review, Action Required, Approved, and Issued.'
+    question: 'How are public service requests resolved and tracked?',
+    answer: 'Once submitted, your incident report is assigned an official tracking reference code and registered into the relevant County administration queue. Authorized municipal administrators and dispatch officers track the case (Pending → In Progress → Resolved), dispatch field maintenance teams, and log resolution notes.'
   },
   {
     question: 'How can an employer or institution verify my issued certificate?',
@@ -39,9 +39,12 @@ const FAQS: FaqItem[] = [
 
 export default function HelpSupportView({
   onBackToHome,
-  onNavigateTrack,
   onNavigateVerify
-}: HelpSupportViewProps) {
+}: {
+  onBackToHome: () => void;
+  onNavigateTrack?: () => void;
+  onNavigateVerify: () => void;
+}) {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const toggleFaq = (idx: number) => {
@@ -74,16 +77,16 @@ export default function HelpSupportView({
             How can we help you today?
           </h1>
           <p className="text-sm text-gray-600 mt-2 max-w-2xl leading-relaxed">
-            Find answers to frequently asked questions, learn how to track and verify your government applications, or reach our dedicated public service support desk.
+            Find answers to frequently asked questions, learn how public service requests are processed by municipal administration, or reach our dedicated support desk.
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
             <button
-              onClick={onNavigateTrack}
+              onClick={onBackToHome}
               className="px-4 py-2.5 rounded-2xl bg-[#008751] hover:bg-[#007043] text-white text-xs font-semibold flex items-center space-x-2 transition-colors"
             >
               <FileSearch className="w-4 h-4" />
-              <span>Track Existing Application</span>
+              <span>Submit a Service Request</span>
             </button>
             <button
               onClick={onNavigateVerify}

@@ -1,6 +1,14 @@
-import { ServiceRequest, ApplicationStatus, OfficerReviewRecord, OfficerAccount, CitizenAccount } from '@/types';
+import {
+  ServiceRequest,
+  RequestStatus,
+  AdminResolution,
+  OfficerAccount,
+  CitizenAccount,
+  AnalyticsSummary,
+  ServiceCategory
+} from '@/types';
 
-const STORAGE_KEY = 'mini_ecitizen_requests_v2';
+const STORAGE_KEY = 'mini_ecitizen_civic_requests_v6';
 const OFFICER_SESSION_KEY = 'mini_ecitizen_officer_session';
 const CITIZEN_SESSION_KEY = 'mini_ecitizen_citizen_session';
 const CITIZENS_DB_KEY = 'mini_ecitizen_citizens_db';
@@ -10,6 +18,11 @@ export function getStoredRequests(): ServiceRequest[] {
     return [];
   }
   try {
+    localStorage.removeItem('mini_ecitizen_public_requests_v3');
+    localStorage.removeItem('mini_ecitizen_requests_v2');
+    localStorage.removeItem('mini_ecitizen_requests_v1');
+    localStorage.removeItem('mini_ecitizen_requests');
+
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
@@ -17,7 +30,16 @@ export function getStoredRequests(): ServiceRequest[] {
     }
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) {
-      return parsed;
+      const filtered = parsed.filter(item => {
+        if (!item || !item.id) return false;
+        if (typeof item.id === 'string' && item.id.startsWith('req-sample')) return false;
+        if (typeof item.referenceNumber === 'string' && (item.referenceNumber.includes('1042') || item.referenceNumber.includes('2051'))) return false;
+        return true;
+      });
+      if (filtered.length !== parsed.length) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+      }
+      return filtered;
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
     return [];
@@ -31,7 +53,7 @@ export function saveStoredRequests(requests: ServiceRequest[]): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(requests));
   } catch (e) {
-    console.error('Storage write error', e);
+    console.error('Storage error', e);
   }
 }
 
@@ -42,11 +64,10 @@ export function createNewRequest(newRequest: ServiceRequest): ServiceRequest[] {
   return updated;
 }
 
-export function updateRequestReview(
+export function updateRequestStatus(
   id: string,
-  newStatus: ApplicationStatus,
-  reviewRecord: OfficerReviewRecord,
-  certificateData?: ServiceRequest['certificate']
+  newStatus: RequestStatus,
+  resolution: AdminResolution
 ): ServiceRequest[] {
   const current = getStoredRequests();
   const updated = current.map(item => {
@@ -55,14 +76,57 @@ export function updateRequestReview(
         ...item,
         status: newStatus,
         updatedAt: new Date().toISOString(),
-        reviewRecord,
-        ...(certificateData ? { certificate: certificateData } : {})
+        adminFeedback: resolution
       };
     }
     return item;
   });
   saveStoredRequests(updated);
   return updated;
+}
+
+export function deleteRequest(id: string): ServiceRequest[] {
+  const current = getStoredRequests();
+  const updated = current.filter(item => item.id !== id);
+  saveStoredRequests(updated);
+  return updated;
+}
+
+export function calculateAnalytics(requests: ServiceRequest[]): AnalyticsSummary {
+  const totalRequests = requests.length;
+  const openCases = requests.filter(r => r.status === 'PENDING').length;
+  const inProgressCases = requests.filter(r => r.status === 'IN_PROGRESS').length;
+  const resolvedCases = requests.filter(r => r.status === 'RESOLVED').length;
+
+  const resolutionRate =
+    totalRequests > 0 ? Math.round((resolvedCases / totalRequests) * 100) : 0;
+
+  const categoryCounts: Record<ServiceCategory, number> = {
+    STREETLIGHT: 0,
+    WATER: 0,
+    GARBAGE: 0,
+    ROAD: 0,
+    SEWERAGE: 0,
+    PUBLIC_HEALTH: 0,
+    OTHER: 0
+  };
+
+  requests.forEach(r => {
+    if (categoryCounts[r.category] !== undefined) {
+      categoryCounts[r.category] += 1;
+    } else {
+      categoryCounts.OTHER += 1;
+    }
+  });
+
+  return {
+    totalRequests,
+    openCases,
+    inProgressCases,
+    resolvedCases,
+    resolutionRate,
+    categoryCounts
+  };
 }
 
 export function getStoredOfficerSession(): OfficerAccount | null {
@@ -127,12 +191,4 @@ export function saveRegisteredCitizen(account: CitizenAccount): void {
     list.push(account);
   }
   localStorage.setItem(CITIZENS_DB_KEY, JSON.stringify(list));
-}
-
-export function clearDatabase(): ServiceRequest[] {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
-    localStorage.removeItem('mini_ecitizen_requests_v1');
-  }
-  return [];
 }

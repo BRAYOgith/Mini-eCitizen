@@ -9,6 +9,7 @@ import { ShieldCheck, User, ArrowRight } from 'lucide-react';
 
 interface CitizenAuthProps {
   initialMode?: 'login' | 'register';
+  noticeMessage?: string;
   onAuthenticated: (citizen: CitizenAccount) => void;
   onCancel: () => void;
   onSwitchToOfficer?: () => void;
@@ -16,6 +17,7 @@ interface CitizenAuthProps {
 
 export default function CitizenAuth({
   initialMode = 'login',
+  noticeMessage,
   onAuthenticated,
   onCancel,
   onSwitchToOfficer
@@ -134,6 +136,13 @@ export default function CitizenAuth({
           Access all Government of Kenya digital services with one account
         </p>
       </div>
+
+      {noticeMessage && (
+        <div className="mt-4 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex items-start gap-2">
+          <ShieldCheck className="w-4 h-4 text-[#008751] shrink-0 mt-0.5" />
+          <span>{noticeMessage}</span>
+        </div>
+      )}
 
       <div className="flex border-b border-gray-200 mt-4 mb-6 text-xs font-semibold">
         <button
