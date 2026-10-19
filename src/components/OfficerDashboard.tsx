@@ -202,9 +202,9 @@ export default function OfficerDashboard({
           <div className="text-3xl font-extrabold text-[#006633]">
             {analytics.resolutionRate}%
           </div>
-          <div className="w-full bg-gray-100 rounded-full h-2 mt-2 overflow-hidden">
+          <div className="w-full bg-gray-100 rounded-sm h-2 mt-2 overflow-hidden">
             <div
-              className="bg-[#006633] h-2 rounded-full transition-all duration-500"
+              className="bg-[#006633] h-2 rounded-sm transition-all duration-500"
               style={{ width: `${analytics.resolutionRate}%` }}
             />
           </div>
@@ -240,9 +240,9 @@ export default function OfficerDashboard({
                   <span className="text-lg font-bold text-gray-900">{count}</span>
                   <span className="text-xs font-semibold text-gray-400">{pct}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2 overflow-hidden">
+                <div className="w-full bg-gray-200 rounded-sm h-1.5 mt-2 overflow-hidden">
                   <div
-                    className="bg-[#006633] h-1.5 rounded-full"
+                    className="bg-[#006633] h-1.5 rounded-sm"
                     style={{ width: `${pct}%` }}
                   />
                 </div>
@@ -708,7 +708,7 @@ export default function OfficerDashboard({
             <button
               type="button"
               onClick={() => setZoomImageUrl(null)}
-              className="absolute top-3 right-3 p-2 bg-black/60 hover:bg-black/90 text-white rounded-full transition-colors z-10"
+              className="absolute top-3 right-3 p-2 bg-black/60 hover:bg-black/90 text-white rounded-lg transition-colors z-10"
             >
               <X className="w-5 h-5" />
             </button>

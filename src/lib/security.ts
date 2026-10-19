@@ -131,36 +131,136 @@ export function checkSubmissionRateLimit(): { allowed: boolean; waitSeconds?: nu
   return { allowed: true };
 }
 
-export function recordLoginAttempt(success: boolean): { allowed: boolean; waitMinutes?: number } {
-  if (typeof window === 'undefined') return { allowed: true };
-  const attemptsKey = 'ecitizen_auth_attempts';
-  const lockoutKey = 'ecitizen_auth_lockout_until';
+export interface PasswordStrength {
+  score: number;
+  label: 'Very Weak' | 'Weak' | 'Fair' | 'Strong' | 'Excellent';
+  color: string;
+  hasMinLength: boolean;
+  hasUpper: boolean;
+  hasLower: boolean;
+  hasNumber: boolean;
+  hasSpecial: boolean;
+  isValid: boolean;
+}
+
+export function evaluatePasswordStrength(password: string): PasswordStrength {
+  const hasMinLength = password.length >= 8;
+  const hasUpper = /[A-Z]/.test(password);
+  const hasLower = /[a-z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(password);
+
+  let criteriaMet = 0;
+  if (hasMinLength) criteriaMet += 1;
+  if (hasUpper) criteriaMet += 1;
+  if (hasLower) criteriaMet += 1;
+  if (hasNumber) criteriaMet += 1;
+  if (hasSpecial) criteriaMet += 1;
+
+  let label: PasswordStrength['label'] = 'Very Weak';
+  let color = 'bg-red-500';
+
+  if (criteriaMet <= 1) {
+    label = 'Very Weak';
+    color = 'bg-red-500';
+  } else if (criteriaMet === 2) {
+    label = 'Weak';
+    color = 'bg-orange-500';
+  } else if (criteriaMet === 3) {
+    label = 'Fair';
+    color = 'bg-amber-500';
+  } else if (criteriaMet === 4) {
+    label = 'Strong';
+    color = 'bg-blue-600';
+  } else if (criteriaMet === 5) {
+    label = 'Excellent';
+    color = 'bg-[#008751]';
+  }
+
+  const isValid = hasMinLength && hasUpper && hasLower && hasNumber;
+
+  return {
+    score: (criteriaMet / 5) * 100,
+    label,
+    color,
+    hasMinLength,
+    hasUpper,
+    hasLower,
+    hasNumber,
+    hasSpecial,
+    isValid
+  };
+}
+
+export interface LoginLockoutState {
+  isLocked: boolean;
+  remainingSeconds: number;
+  attemptsLeft: number;
+}
+
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_DURATION_SECONDS = 60;
+
+export function checkLoginLockout(identifier = 'global'): LoginLockoutState {
+  if (typeof window === 'undefined') {
+    return { isLocked: false, remainingSeconds: 0, attemptsLeft: MAX_LOGIN_ATTEMPTS };
+  }
+  const cleanId = identifier.trim().toLowerCase().replace(/[^a-z0-9]/g, '_') || 'global';
+  const attemptsKey = `ecitizen_auth_attempts_${cleanId}`;
+  const lockoutKey = `ecitizen_auth_lockout_${cleanId}`;
   const now = Date.now();
 
   const lockoutUntil = localStorage.getItem(lockoutKey);
   if (lockoutUntil) {
-    const lockoutTime = parseInt(lockoutUntil, 10);
-    if (now < lockoutTime) {
-      const waitMinutes = Math.ceil((lockoutTime - now) / 60000);
-      return { allowed: false, waitMinutes };
+    const lockTime = parseInt(lockoutUntil, 10);
+    if (now < lockTime) {
+      const remainingSeconds = Math.ceil((lockTime - now) / 1000);
+      return { isLocked: true, remainingSeconds, attemptsLeft: 0 };
     } else {
       localStorage.removeItem(lockoutKey);
       localStorage.removeItem(attemptsKey);
     }
   }
 
+  const attempts = parseInt(localStorage.getItem(attemptsKey) || '0', 10);
+  const attemptsLeft = Math.max(0, MAX_LOGIN_ATTEMPTS - attempts);
+  return { isLocked: false, remainingSeconds: 0, attemptsLeft };
+}
+
+export function recordFailedLogin(identifier = 'global'): LoginLockoutState {
+  if (typeof window === 'undefined') {
+    return { isLocked: false, remainingSeconds: 0, attemptsLeft: MAX_LOGIN_ATTEMPTS };
+  }
+  const cleanId = identifier.trim().toLowerCase().replace(/[^a-z0-9]/g, '_') || 'global';
+  const attemptsKey = `ecitizen_auth_attempts_${cleanId}`;
+  const lockoutKey = `ecitizen_auth_lockout_${cleanId}`;
+  const now = Date.now();
+
+  const attempts = parseInt(localStorage.getItem(attemptsKey) || '0', 10) + 1;
+  localStorage.setItem(attemptsKey, attempts.toString());
+
+  if (attempts >= MAX_LOGIN_ATTEMPTS) {
+    const lockUntil = now + (LOCKOUT_DURATION_SECONDS * 1000);
+    localStorage.setItem(lockoutKey, lockUntil.toString());
+    return { isLocked: true, remainingSeconds: LOCKOUT_DURATION_SECONDS, attemptsLeft: 0 };
+  }
+
+  return { isLocked: false, remainingSeconds: 0, attemptsLeft: MAX_LOGIN_ATTEMPTS - attempts };
+}
+
+export function resetLoginAttempts(identifier = 'global'): void {
+  if (typeof window === 'undefined') return;
+  const cleanId = identifier.trim().toLowerCase().replace(/[^a-z0-9]/g, '_') || 'global';
+  localStorage.removeItem(`ecitizen_auth_attempts_${cleanId}`);
+  localStorage.removeItem(`ecitizen_auth_lockout_${cleanId}`);
+}
+
+export function recordLoginAttempt(success: boolean): { allowed: boolean; waitMinutes?: number } {
+  if (typeof window === 'undefined') return { allowed: true };
   if (success) {
-    localStorage.removeItem(attemptsKey);
-    localStorage.removeItem(lockoutKey);
-    return { allowed: true };
-  } else {
-    const current = parseInt(localStorage.getItem(attemptsKey) || '0', 10) + 1;
-    localStorage.setItem(attemptsKey, current.toString());
-    if (current >= 5) {
-      const lockDurationMs = 5 * 60 * 1000;
-      localStorage.setItem(lockoutKey, (now + lockDurationMs).toString());
-      return { allowed: false, waitMinutes: 5 };
-    }
+    resetLoginAttempts('global');
     return { allowed: true };
   }
+  const status = recordFailedLogin('global');
+  return { allowed: !status.isLocked, waitMinutes: Math.ceil(status.remainingSeconds / 60) };
 }

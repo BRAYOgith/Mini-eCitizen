@@ -73,6 +73,7 @@ export default function Home() {
   const [authenticatedCitizen, setAuthenticatedCitizen] = useState<CitizenAccount | null>(null);
   const [authenticatedOfficer, setAuthenticatedOfficer] = useState<OfficerAccount | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [activeTrackingCode, setActiveTrackingCode] = useState<string>('');
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -198,6 +199,7 @@ export default function Home() {
         authenticatedCitizen={authenticatedCitizen}
         onCitizenSignOut={handleCitizenSignOut}
         authenticatedOfficer={authenticatedOfficer}
+        onOfficerSignOut={handleOfficerSignOut}
         pendingRequestsCount={analytics.openCases}
         onSearchClick={focusSearch}
       />
@@ -419,6 +421,38 @@ export default function Home() {
                             </button>
                           </div>
                         </div>
+                      ) : authenticatedOfficer ? (
+                        <div className="px-5 sm:px-10 py-7 sm:flex items-center justify-between bg-gradient-to-tr from-gray-900/90 to-black/70 border-t border-emerald-500/30">
+                          <div>
+                            <span className="text-xs uppercase tracking-wider text-emerald-400 font-semibold">
+                              Authenticated Admin Session
+                            </span>
+                            <h3 className="text-white text-xl sm:text-2xl font-normal mt-0.5" style={{ color: '#ffffff' }}>
+                              Public Service Officer Console ({authenticatedOfficer.badgeNumber})
+                            </h3>
+                            <p className="text-xs text-gray-300 mt-1">
+                              Logged in as {authenticatedOfficer.fullName} • {authenticatedOfficer.department || 'National Administration'}
+                            </p>
+                          </div>
+                          <div className="flex space-x-3 items-center mt-4 sm:mt-0">
+                            <button
+                              onClick={() => {
+                                setCurrentView('officer');
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                              }}
+                              className="rounded-3xl whitespace-nowrap bg-[#008751] hover:bg-[#007043] py-2.5 px-6 font-semibold text-white shadow-xs text-sm transition-colors flex items-center gap-2"
+                            >
+                              <Lock className="w-4 h-4" />
+                              <span>Open Admin Dashboard</span>
+                            </button>
+                            <button
+                              onClick={handleOfficerSignOut}
+                              className="rounded-3xl whitespace-nowrap border border-white/20 bg-white/10 hover:bg-white/20 py-2.5 px-4 font-medium text-white text-sm transition-colors"
+                            >
+                              Sign out
+                            </button>
+                          </div>
+                        </div>
                       ) : (
                         <div className="px-5 sm:px-10 py-7 sm:flex items-center justify-between bg-gradient-to-tr from-black/60 to-black/40">
                           <h3 className="text-white text-xl sm:text-2xl font-normal" style={{ color: '#ffffff' }}>
@@ -454,31 +488,88 @@ export default function Home() {
               </div>
             </div>
 
-            {requests.length > 0 && (
+            {authenticatedCitizen && requests.filter((r) => r.applicant.nationalId === authenticatedCitizen.nationalId).length > 0 && (
               <div className="w-full mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8 mt-10">
-                <div className="flex items-center justify-between mb-5">
-                  <h2 className="text-2xl font-semibold tracking-tight text-gray-900">
-                    Registered Incident Overview
-                  </h2>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-5 gap-2">
+                  <div>
+                    <h2 className="text-2xl font-semibold tracking-tight text-gray-900">
+                      My Reported Incidents ({requests.filter((r) => r.applicant.nationalId === authenticatedCitizen.nationalId).length})
+                    </h2>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Your registered municipal issue reports under National ID: {authenticatedCitizen.nationalId}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setCurrentView('track');
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="text-xs font-semibold text-[#006633] hover:underline inline-flex items-center gap-1"
+                  >
+                    <span>View all tracking details</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <div className="bg-white border border-gray-200 rounded-2xl p-5">
-                    <span className="text-xs text-gray-500 uppercase font-medium">Total Registered</span>
-                    <div className="text-2xl font-bold text-gray-900 mt-1">{analytics.totalRequests}</div>
-                  </div>
-                  <div className="bg-white border border-gray-200 rounded-2xl p-5">
-                    <span className="text-xs text-gray-500 uppercase font-medium">Pending Review</span>
-                    <div className="text-2xl font-bold text-gray-900 mt-1">{analytics.openCases}</div>
-                  </div>
-                  <div className="bg-white border border-gray-200 rounded-2xl p-5">
-                    <span className="text-xs text-gray-500 uppercase font-medium">In Progress</span>
-                    <div className="text-2xl font-bold text-gray-900 mt-1">{analytics.inProgressCases}</div>
-                  </div>
-                  <div className="bg-white border border-gray-200 rounded-2xl p-5">
-                    <span className="text-xs text-gray-500 uppercase font-medium">Resolved Cases</span>
-                    <div className="text-2xl font-bold text-emerald-800 mt-1">{analytics.resolvedCases}</div>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {requests
+                    .filter((r) => r.applicant.nationalId === authenticatedCitizen.nationalId)
+                    .slice(0, 3)
+                    .map((req) => (
+                      <div
+                        key={req.id}
+                        className="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs flex flex-col justify-between"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between gap-2 mb-2">
+                            <span className="font-mono text-xs font-bold text-gray-900">
+                              {req.referenceNumber}
+                            </span>
+                            {req.status === 'PENDING' && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                <AlertCircle className="w-3 h-3" />
+                                Pending
+                              </span>
+                            )}
+                            {req.status === 'IN_PROGRESS' && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                                <Clock className="w-3 h-3" />
+                                In Progress
+                              </span>
+                            )}
+                            {req.status === 'RESOLVED' && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                <CheckCircle2 className="w-3 h-3" />
+                                Resolved
+                              </span>
+                            )}
+                          </div>
+                          <h3 className="font-bold text-sm text-gray-900 truncate">
+                            {req.title}
+                          </h3>
+                          <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                            {req.description}
+                          </p>
+                        </div>
+
+                        <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs">
+                          <span className="text-gray-500 text-[11px]">
+                            {req.location.county} &bull; {req.location.subCounty}
+                          </span>
+                          <button
+                            onClick={() => {
+                              setActiveTrackingCode(req.referenceNumber);
+                              setCurrentView('track');
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                            className="font-semibold text-[#006633] hover:underline inline-flex items-center gap-1"
+                          >
+                            <span>Track Status</span>
+                            <ArrowRight className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                 </div>
               </div>
             )}
@@ -656,8 +747,10 @@ export default function Home() {
             onSubmitSuccess={(newReq) => {
               handleApplicationSubmit(newReq);
             }}
-            onNavigateTrack={() => {
-              setCurrentView('catalog');
+            onNavigateTrack={(refNumber) => {
+              setActiveTrackingCode(refNumber);
+              setCurrentView('track');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             onRequireAuth={() => {
               setPendingCategoryAfterAuth(selectedCategory || 'STREETLIGHT');
@@ -669,42 +762,16 @@ export default function Home() {
         )}
 
         {currentView === 'track' && (
-          authenticatedOfficer ? (
-            <OfficerDashboard
-              requests={requests}
-              officerAccount={authenticatedOfficer}
-              onUpdateRequest={handleUpdateRequest}
-              onSignOut={handleOfficerSignOut}
-            />
-          ) : (
-            <div className="max-w-xl mx-auto my-16 bg-white border border-gray-200 rounded-3xl p-8 sm:p-10 text-center font-lexend shadow-xs">
-              <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center mx-auto mb-4">
-                <Lock className="w-8 h-8" />
-              </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-                Administrative Status Tracking Portal
-              </h2>
-              <p className="text-xs text-gray-600 mt-2 leading-relaxed max-w-md mx-auto">
-                Incident status tracking and municipal dispatch management (Pending &rarr; In Progress &rarr; Resolved) are strictly restricted to authorized County Public Works and Municipal Administration officers.
-              </p>
-              <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-                <button
-                  type="button"
-                  onClick={() => setCurrentView('officer-auth')}
-                  className="px-6 py-3 rounded-3xl bg-[#008751] hover:bg-[#007043] text-white text-xs font-semibold transition-colors"
-                >
-                  Sign In to Admin Console
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCurrentView('catalog')}
-                  className="px-5 py-3 rounded-3xl border border-gray-300 text-gray-700 hover:bg-gray-50 text-xs font-medium transition-colors"
-                >
-                  Return to Homepage
-                </button>
-              </div>
-            </div>
-          )
+          <PublicVerificationModal
+            requests={requests}
+            initialSearchQuery={activeTrackingCode}
+            authenticatedCitizen={authenticatedCitizen}
+            onNavigateApply={() => {
+              setSelectedCategory('STREETLIGHT');
+              setCurrentView('apply');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
         )}
 
         {currentView === 'officer-auth' && (
@@ -734,7 +801,12 @@ export default function Home() {
           <PublicVerificationModal
             requests={requests}
             initialSearchQuery=""
-            onClose={() => setCurrentView('catalog')}
+            authenticatedCitizen={authenticatedCitizen}
+            onNavigateApply={() => {
+              setSelectedCategory('STREETLIGHT');
+              setCurrentView('apply');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
           />
         )}
       </main>

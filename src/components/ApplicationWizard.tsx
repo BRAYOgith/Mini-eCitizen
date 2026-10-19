@@ -390,6 +390,15 @@ export default function ApplicationWizard({
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
             type="button"
+            onClick={() => onNavigateTrack(submittedRequest.referenceNumber)}
+            className="px-6 py-3 rounded-lg bg-[#008751] hover:bg-[#007043] text-white text-xs font-semibold transition-colors flex items-center justify-center gap-2 shadow-xs"
+          >
+            <Clock className="w-4 h-4" />
+            <span>Track Incident Status Now</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+          <button
+            type="button"
             onClick={() => {
               setSubmittedRequest(null);
               setDescription('');
@@ -397,14 +406,14 @@ export default function ApplicationWizard({
               setImagePreviewUrl('');
               setImageError('');
             }}
-            className="px-6 py-3 rounded-3xl bg-[#008751] hover:bg-[#007043] text-white text-xs font-semibold transition-colors"
+            className="px-5 py-3 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 text-xs font-semibold transition-colors"
           >
             Submit Another Request
           </button>
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-3 rounded-3xl border border-gray-300 text-gray-700 hover:bg-gray-50 text-xs font-semibold transition-colors"
+            className="px-5 py-3 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 text-xs font-medium transition-colors"
           >
             Return to Homepage
           </button>
@@ -434,7 +443,7 @@ export default function ApplicationWizard({
         </div>
         <button
           onClick={onCancel}
-          className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+          className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
           title="Cancel"
         >
           <X className="w-5 h-5" />
@@ -479,7 +488,7 @@ export default function ApplicationWizard({
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                       selected ? 'bg-[#008751] text-white' : 'bg-gray-100 text-gray-700'
                     }`}>
                       {getCategoryIcon(cat.id)}
@@ -678,7 +687,7 @@ export default function ApplicationWizard({
               <button
                 type="button"
                 onClick={removeImage}
-                className="absolute top-2 right-2 p-1.5 rounded-full bg-black/70 hover:bg-black text-white transition-colors"
+                className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/70 hover:bg-black text-white transition-colors"
                 title="Remove photo"
               >
                 <X className="w-4 h-4" />

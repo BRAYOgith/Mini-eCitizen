@@ -136,7 +136,7 @@ export default function HelpSupportView({
               </h3>
               <div className="space-y-4 text-xs">
                 <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 rounded-full bg-emerald-50 text-[#008751] flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 text-[#008751] flex items-center justify-center shrink-0">
                     <Phone className="w-4 h-4" />
                   </div>
                   <div>
@@ -146,7 +146,7 @@ export default function HelpSupportView({
                 </div>
 
                 <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                     <Mail className="w-4 h-4" />
                   </div>
                   <div>
@@ -156,7 +156,7 @@ export default function HelpSupportView({
                 </div>
 
                 <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
                     <Clock className="w-4 h-4" />
                   </div>
                   <div>
@@ -167,7 +167,7 @@ export default function HelpSupportView({
                 </div>
 
                 <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
                     <MapPin className="w-4 h-4" />
                   </div>
                   <div>

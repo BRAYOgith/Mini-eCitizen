@@ -209,7 +209,7 @@ export default function ApplicationTracker({
 
                       <div className="flex flex-col items-center relative z-10">
                         <div
-                          className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs mb-2 transition-colors ${
+                          className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs mb-2 transition-colors ${
                             pendingState === 'completed'
                               ? 'bg-[#008751] text-white'
                               : pendingState === 'active'
@@ -225,7 +225,7 @@ export default function ApplicationTracker({
 
                       <div className="flex flex-col items-center relative z-10">
                         <div
-                          className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs mb-2 transition-colors ${
+                          className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs mb-2 transition-colors ${
                             inProgressState === 'completed'
                               ? 'bg-[#008751] text-white'
                               : inProgressState === 'active'
@@ -241,7 +241,7 @@ export default function ApplicationTracker({
 
                       <div className="flex flex-col items-center relative z-10">
                         <div
-                          className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs mb-2 transition-colors ${
+                          className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs mb-2 transition-colors ${
                             resolvedState === 'active' || resolvedState === 'completed'
                               ? 'bg-[#008751] text-white ring-4 ring-emerald-100'
                               : 'bg-gray-200 text-gray-600'
@@ -349,7 +349,7 @@ export default function ApplicationTracker({
             <div className="relative max-w-3xl max-h-[90vh] bg-white rounded-3xl p-2 overflow-hidden">
               <button
                 onClick={() => setSelectedImage(null)}
-                className="absolute top-4 right-4 p-2 rounded-full bg-black/60 text-white hover:bg-black"
+                className="absolute top-4 right-4 p-2 rounded-lg bg-black/60 text-white hover:bg-black transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>

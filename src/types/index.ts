@@ -18,6 +18,7 @@ export interface CitizenAccount {
   email: string;
   phoneNumber: string;
   county: string;
+  password?: string;
 }
 
 export interface OfficerAccount {
@@ -27,6 +28,7 @@ export interface OfficerAccount {
   email: string;
   department: string;
   role: string;
+  password?: string;
 }
 
 export interface RequestLocation {

@@ -4,18 +4,6 @@ An interactive, responsive Public Service Request web application designed in th
 
 ---
 
-## Evaluation Rubric Alignment
-
-| Criteria | Weight | Implementation Summary |
-| :--- | :---: | :--- |
-| **Code Quality & Structure** | **25%** | Modular Next.js App Router architecture, strict TypeScript types (`src/types/index.ts`), clean state separation, reusable UI components, and client-side persistence (`src/lib/storage.ts`). Zero code clutter. |
-| **Functionality** | **35%** | Complete end-to-end user journeys: Citizen registration/login, municipal request wizard with client validation and photo evidence, 3-step status tracker (`Pending` &rarr; `In Progress` &rarr; `Resolved`), and admin triage console. |
-| **UI/UX Design** | **20%** | Faithful recreation of the official eCitizen aesthetic: Lexend typography, Republic of Kenya Coat of Arms, agency emblems, official 47 county crests, status progress steppers, responsive mobile drawers, and accessible color contrast. |
-| **Documentation** | **10%** | Clear setup commands, system architectural overview, test credentials, and testing procedures. |
-| **Bonus Features** | **10%** | Visual category analytics breakdown, high-resolution photo evidence zoom modal, public registry reference verification, and client-side anti-spam throttling. |
-
----
-
 ## Core Features
 
 ### 1. Citizen Registration & Authentication
@@ -53,30 +41,33 @@ An interactive, responsive Public Service Request web application designed in th
   - Record official administrative remarks and resolution feedback visible to citizens.
 - Multi-dimensional filtering by workflow status, incident category, priority level, and full-text search.
 
-### 5. Basic Analytics & Reporting
+### 5. Analytics & Reporting (Admin Console)
 - Summary KPI metric cards:
-  - **Total Requests**: Total incident reports received.
+  - **Total Requests**: Total incident reports received across all municipal services.
   - **Open Cases (Pending)**: Reports awaiting departmental triage.
   - **In Progress**: Work orders currently active with field response teams.
   - **Resolved Cases**: Completed and inspected municipal repairs.
   - **Resolution Rate %**: Visual percentage bar of resolved vs. total cases.
 - **Category Distribution**: Proportional case distribution across all municipal categories with interactive filtering.
-- Public analytics ticker visible on the homepage for municipal transparency.
 
 ---
 
-## Test Credentials & Evaluation Instructions
+## User Registration & Security Architecture
 
-For rapid evaluation and grading, pre-configured accounts are provided:
+### 1. Zero Preconfigured Accounts
+- All accounts start clean: citizens and municipal officers register directly on the portal via the **Register** and **Officer Portal** tabs.
+- Citizen registration validates genuine Kenyan National ID formats and unique identities.
+- Officer registration assigns authorized municipal credentials (Badge Number, Official Email, Department).
 
-### Municipal Admin Account
-- **Access Point**: Click **"Officer Portal"** in the navigation bar or footer.
-- **Badge Number / Email**: `ADMIN-001` or `officer@ecitizen.go.ke`
-- **Password**: Any password (min. 6 characters, e.g. `admin123`)
+### 2. Real-Time Password Security Analysis
+- Interactive client-side JavaScript evaluation checks password entropy in real time as the user types.
+- Enforces strict criteria: minimum 8 characters, uppercase letters (`A-Z`), lowercase letters (`a-z`), numbers (`0-9`), and special characters (`!@#$%^&*`).
+- Dynamic visual strength meter (Very Weak &rarr; Weak &rarr; Fair &rarr; Strong &rarr; Excellent) with instant feedback.
 
-### Citizen Account
-- **Access Point**: Click **"Sign in"** in the navigation bar.
-- **National ID**: `34190822` (Grace Wanjiku Kimani) or click **"Register"** to create a custom citizen profile.
+### 3. Rate Limiter & Brute-Force Lockout Blocker
+- Continuous tracking of failed login attempts per account and session.
+- Exceeding 5 consecutive failed attempts triggers an automated security lockout with a live countdown timer.
+- All form inputs and authentication endpoints are disabled during lockout duration to prevent automated brute-force attacks.
 
 ---
 

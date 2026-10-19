@@ -12,6 +12,7 @@ const STORAGE_KEY = 'mini_ecitizen_civic_requests_v6';
 const OFFICER_SESSION_KEY = 'mini_ecitizen_officer_session';
 const CITIZEN_SESSION_KEY = 'mini_ecitizen_citizen_session';
 const CITIZENS_DB_KEY = 'mini_ecitizen_citizens_db';
+const OFFICERS_DB_KEY = 'mini_ecitizen_officers_db';
 
 export function getStoredRequests(): ServiceRequest[] {
   if (typeof window === 'undefined') {
@@ -191,4 +192,28 @@ export function saveRegisteredCitizen(account: CitizenAccount): void {
     list.push(account);
   }
   localStorage.setItem(CITIZENS_DB_KEY, JSON.stringify(list));
+}
+
+export function getRegisteredOfficers(): OfficerAccount[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(OFFICERS_DB_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveRegisteredOfficer(officer: OfficerAccount): void {
+  if (typeof window === 'undefined') return;
+  const list = getRegisteredOfficers();
+  const existingIdx = list.findIndex(o => o.badgeNumber.toLowerCase() === officer.badgeNumber.toLowerCase() || o.email.toLowerCase() === officer.email.toLowerCase());
+  if (existingIdx >= 0) {
+    list[existingIdx] = officer;
+  } else {
+    list.push(officer);
+  }
+  localStorage.setItem(OFFICERS_DB_KEY, JSON.stringify(list));
 }

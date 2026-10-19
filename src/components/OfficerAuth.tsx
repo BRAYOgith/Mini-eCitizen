@@ -1,9 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { OfficerAccount } from '@/types';
-import { sanitizeInput, recordLoginAttempt } from '@/lib/security';
-import { Lock } from 'lucide-react';
+import {
+  sanitizeInput,
+  evaluatePasswordStrength,
+  checkLoginLockout,
+  recordFailedLogin,
+  resetLoginAttempts
+} from '@/lib/security';
+import { getRegisteredOfficers, saveRegisteredOfficer } from '@/lib/storage';
+import { Lock, ShieldAlert, Check, X, AlertTriangle } from 'lucide-react';
 
 interface OfficerAuthProps {
   onAuthenticated: (officer: OfficerAccount) => void;
@@ -16,68 +23,139 @@ export default function OfficerAuth({ onAuthenticated, onCancel }: OfficerAuthPr
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
-  const [department, setDepartment] = useState('Directorate of Criminal Investigations (DCI)');
+  const [department, setDepartment] = useState('County Public Works & Infrastructure');
   const [errorMessage, setErrorMessage] = useState('');
+
+  const [lockoutSeconds, setLockoutSeconds] = useState(0);
+  const [attemptsRemaining, setAttemptsRemaining] = useState(5);
+
+  const passwordAnalysis = evaluatePasswordStrength(password);
+
+  useEffect(() => {
+    const status = checkLoginLockout(badgeNumber || 'global_officer');
+    setLockoutSeconds(status.remainingSeconds);
+    setAttemptsRemaining(status.attemptsLeft);
+  }, [badgeNumber]);
+
+  useEffect(() => {
+    if (lockoutSeconds <= 0) return;
+    const timer = setInterval(() => {
+      setLockoutSeconds((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          const status = checkLoginLockout(badgeNumber || 'global_officer');
+          setAttemptsRemaining(status.attemptsLeft);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [lockoutSeconds, badgeNumber]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
 
-    const attemptCheck = recordLoginAttempt(false);
-    if (!attemptCheck.allowed) {
-      setErrorMessage(`Security Lockout: Too many failed login attempts. Please wait ${attemptCheck.waitMinutes} minutes before trying again.`);
+    const lockoutStatus = checkLoginLockout(badgeNumber || 'global_officer');
+    if (lockoutStatus.isLocked) {
+      setLockoutSeconds(lockoutStatus.remainingSeconds);
+      setErrorMessage(`Security Lockout Active: Too many failed login attempts. Please wait ${lockoutStatus.remainingSeconds} seconds.`);
       return;
     }
 
-    if (!badgeNumber.trim() || !password.trim()) {
+    const cleanBadge = sanitizeInput(badgeNumber.trim());
+    if (!cleanBadge || !password.trim()) {
       setErrorMessage('Please enter both your Officer Badge Number / Email and Password.');
       return;
     }
 
-    recordLoginAttempt(true);
+    const registered = getRegisteredOfficers();
+    const found = registered.find(
+      (o) =>
+        o.badgeNumber.toLowerCase() === cleanBadge.toLowerCase() ||
+        o.email.toLowerCase() === cleanBadge.toLowerCase()
+    );
 
-    const officer: OfficerAccount = {
-      id: `off-${Date.now()}`,
-      badgeNumber: sanitizeInput(badgeNumber.trim()),
-      fullName: badgeNumber.includes('@') ? badgeNumber.split('@')[0] : `Officer ${badgeNumber}`,
-      email: badgeNumber.includes('@') ? badgeNumber : `${badgeNumber.toLowerCase()}@ecitizen.go.ke`,
-      department: 'Government Clearance Registry',
-      role: 'Reviewing Clearance Officer'
-    };
+    if (!found) {
+      const lockResult = recordFailedLogin(badgeNumber || 'global_officer');
+      setLockoutSeconds(lockResult.remainingSeconds);
+      setAttemptsRemaining(lockResult.attemptsLeft);
 
-    onAuthenticated(officer);
+      if (lockResult.isLocked) {
+        setErrorMessage(`Security Exception: 5 failed attempts reached. Officer access locked for ${lockResult.remainingSeconds} seconds.`);
+      } else {
+        setErrorMessage(`No officer account found for "${cleanBadge}". Please register your official officer credentials first. (${lockResult.attemptsLeft} attempts remaining).`);
+      }
+      return;
+    }
+
+    if (found.password && found.password !== password) {
+      const lockResult = recordFailedLogin(badgeNumber || 'global_officer');
+      setLockoutSeconds(lockResult.remainingSeconds);
+      setAttemptsRemaining(lockResult.attemptsLeft);
+
+      if (lockResult.isLocked) {
+        setErrorMessage(`Security Exception: 5 failed attempts reached. Form locked for ${lockResult.remainingSeconds} seconds.`);
+      } else {
+        setErrorMessage(`Incorrect officer password. Please verify your credentials. (${lockResult.attemptsLeft} attempts remaining before temporary lockout).`);
+      }
+      return;
+    }
+
+    resetLoginAttempts(badgeNumber || 'global_officer');
+    onAuthenticated(found);
   };
 
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
 
-    if (!fullName.trim() || !badgeNumber.trim() || !email.trim() || !password.trim()) {
+    const cleanFullName = sanitizeInput(fullName.trim());
+    const cleanBadge = sanitizeInput(badgeNumber.trim());
+    const cleanEmail = sanitizeInput(email.trim());
+
+    if (!cleanFullName || !cleanBadge || !cleanEmail || !password.trim()) {
       setErrorMessage('All official registration fields are required.');
       return;
     }
 
-    if (password.length < 6) {
-      setErrorMessage('Security policy requires officer passwords to be at least 6 characters in length.');
+    if (!passwordAnalysis.isValid) {
+      setErrorMessage('Security policy requires officer passwords to be at least 8 characters with uppercase, lowercase, and numbers.');
       return;
     }
 
-    recordLoginAttempt(true);
+    const registered = getRegisteredOfficers();
+    const alreadyExists = registered.some(
+      (o) =>
+        o.badgeNumber.toLowerCase() === cleanBadge.toLowerCase() ||
+        o.email.toLowerCase() === cleanEmail.toLowerCase()
+    );
+
+    if (alreadyExists) {
+      setErrorMessage('An officer profile with this Badge Number or Email is already registered. Please sign in.');
+      return;
+    }
 
     const officer: OfficerAccount = {
       id: `off-${Date.now()}`,
-      badgeNumber: sanitizeInput(badgeNumber.trim()),
-      fullName: sanitizeInput(fullName.trim()),
-      email: sanitizeInput(email.trim()),
+      badgeNumber: cleanBadge,
+      fullName: cleanFullName,
+      email: cleanEmail,
       department: department,
-      role: 'Authorized Public Officer'
+      role: 'County Municipal Administrator',
+      password: password
     };
 
+    saveRegisteredOfficer(officer);
+    resetLoginAttempts(cleanBadge);
     onAuthenticated(officer);
   };
 
+  const isLocked = lockoutSeconds > 0;
+
   return (
-    <div className="max-w-md mx-auto my-10 bg-white border border-gray-300 rounded-md shadow-xs p-6">
+    <div className="max-w-md mx-auto my-10 bg-white border border-gray-300 rounded-xl shadow-xs p-6 font-lexend">
       <div className="border-b border-gray-200 pb-3 mb-5 text-center">
         <img
           src="/ecitizen-logo.png"
@@ -88,9 +166,25 @@ export default function OfficerAuth({ onAuthenticated, onCancel }: OfficerAuthPr
           Government Officer Authentication
         </h2>
         <p className="text-xs text-gray-500 mt-0.5">
-          Restricted to authorized public officers under the Laws of Kenya
+          Restricted to authorized municipal and public works officers
         </p>
       </div>
+
+      {isLocked && (
+        <div className="mb-4 p-4 rounded-xl bg-red-50 border border-red-300 text-xs text-red-900 flex items-start gap-3">
+          <ShieldAlert className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+          <div>
+            <strong className="block font-bold">Security Lockout Active</strong>
+            <p className="mt-0.5 text-red-800 leading-relaxed">
+              Too many failed officer login attempts detected. Access is temporarily locked.
+            </p>
+            <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-red-100 border border-red-300 rounded-md font-mono font-bold text-red-900">
+              <Lock className="w-3.5 h-3.5" />
+              <span>Retry permitted in: {lockoutSeconds}s</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex border-b border-gray-200 mb-5 text-xs font-semibold">
         <button
@@ -123,8 +217,8 @@ export default function OfficerAuth({ onAuthenticated, onCancel }: OfficerAuthPr
         </button>
       </div>
 
-      {errorMessage && (
-        <div className="mb-4 p-2.5 bg-red-50 border border-red-200 rounded-md text-xs text-red-700 font-medium">
+      {errorMessage && !isLocked && (
+        <div className="mb-4 p-2.5 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700 font-medium">
           {errorMessage}
         </div>
       )}
@@ -137,10 +231,11 @@ export default function OfficerAuth({ onAuthenticated, onCancel }: OfficerAuthPr
             </label>
             <input
               type="text"
-              placeholder="e.g. POL-4829 or officer@dci.go.ke"
+              disabled={isLocked}
+              placeholder="e.g. SEC-OPS-01 or officer@nairobi.go.ke"
               value={badgeNumber}
               onChange={(e) => setBadgeNumber(e.target.value)}
-              className="w-full px-3 py-2 rounded-md border border-gray-300 text-xs text-gray-900 focus:outline-hidden focus:border-[#006633] focus:ring-1 focus:ring-[#006633]"
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 text-xs text-gray-900 focus:outline-hidden focus:border-[#006633] focus:ring-1 focus:ring-[#006633] disabled:bg-gray-100 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -150,26 +245,35 @@ export default function OfficerAuth({ onAuthenticated, onCancel }: OfficerAuthPr
             </label>
             <input
               type="password"
+              disabled={isLocked}
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 rounded-md border border-gray-300 text-xs text-gray-900 focus:outline-hidden focus:border-[#006633] focus:ring-1 focus:ring-[#006633]"
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 text-xs text-gray-900 focus:outline-hidden focus:border-[#006633] focus:ring-1 focus:ring-[#006633] disabled:bg-gray-100 disabled:cursor-not-allowed"
             />
           </div>
+
+          {attemptsRemaining < 5 && !isLocked && (
+            <div className="text-[11px] text-amber-700 flex items-center gap-1">
+              <AlertTriangle className="w-3.5 h-3.5" />
+              <span>{attemptsRemaining} attempts remaining before temporary lockout.</span>
+            </div>
+          )}
 
           <div className="pt-2 flex items-center gap-2">
             <button
               type="button"
               onClick={onCancel}
-              className="w-1/2 py-2 px-3 rounded-md border border-gray-300 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+              className="w-1/2 py-2 px-3 rounded-lg border border-gray-300 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="w-1/2 py-2 px-3 rounded-md bg-[#006633] hover:bg-[#004d26] text-white text-xs font-semibold transition-colors"
+              disabled={isLocked}
+              className="w-1/2 py-2 px-3 rounded-lg bg-[#006633] hover:bg-[#004d26] disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs font-semibold transition-colors"
             >
-              Authenticate & Enter
+              {isLocked ? 'Blocked' : 'Authenticate & Enter'}
             </button>
           </div>
         </form>
@@ -181,10 +285,10 @@ export default function OfficerAuth({ onAuthenticated, onCancel }: OfficerAuthPr
             </label>
             <input
               type="text"
-              placeholder="e.g. Inspector Grace A. Mutua"
+              placeholder="e.g. Officer Grace A. Mutua"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="w-full px-3 py-1.5 rounded-md border border-gray-300 text-xs text-gray-900 focus:outline-hidden focus:border-[#006633] focus:ring-1 focus:ring-[#006633]"
+              className="w-full px-3 py-1.5 rounded-lg border border-gray-300 text-xs text-gray-900 focus:outline-hidden focus:border-[#006633] focus:ring-1 focus:ring-[#006633]"
             />
           </div>
 
@@ -194,69 +298,107 @@ export default function OfficerAuth({ onAuthenticated, onCancel }: OfficerAuthPr
             </label>
             <input
               type="text"
-              placeholder="e.g. DCI-94182"
+              placeholder="e.g. SEC-OPS-01 or POL-4829"
               value={badgeNumber}
               onChange={(e) => setBadgeNumber(e.target.value)}
-              className="w-full px-3 py-1.5 rounded-md border border-gray-300 text-xs text-gray-900 focus:outline-hidden focus:border-[#006633] focus:ring-1 focus:ring-[#006633]"
+              className="w-full px-3 py-1.5 rounded-lg border border-gray-300 text-xs text-gray-900 focus:outline-hidden focus:border-[#006633] focus:ring-1 focus:ring-[#006633]"
             />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-gray-700 mb-1">
-              Department
+              County Department / Response Division
             </label>
             <select
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
-              className="w-full px-3 py-1.5 rounded-md border border-gray-300 text-xs text-gray-900 bg-white focus:outline-hidden focus:border-[#006633]"
+              className="w-full px-3 py-1.5 rounded-lg border border-gray-300 text-xs text-gray-900 bg-white focus:outline-hidden focus:border-[#006633]"
             >
-              <option value="Directorate of Criminal Investigations (DCI)">Directorate of Criminal Investigations (DCI)</option>
-              <option value="National Transport and Safety Authority (NTSA)">National Transport and Safety Authority (NTSA)</option>
-              <option value="Business Registration Service (BRS)">Business Registration Service (BRS)</option>
-              <option value="Department of Civil Registration (CRS)">Department of Civil Registration (CRS)</option>
-              <option value="Department of Immigration Services">Department of Immigration Services</option>
+              <option value="County Public Works & Infrastructure">County Public Works &amp; Infrastructure</option>
+              <option value="Water & Sewerage Services Company">Water &amp; Sewerage Services Company</option>
+              <option value="Environment & Solid Waste Directorate">Environment &amp; Solid Waste Directorate</option>
+              <option value="Roads, Transport & Bridges Division">Roads, Transport &amp; Bridges Division</option>
+              <option value="Public Health & Safety Inspection">Public Health &amp; Safety Inspection</option>
+              <option value="Emergency Response & Disaster Management">Emergency Response &amp; Disaster Management</option>
             </select>
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-gray-700 mb-1">
-              Official Email
+              Official Government Email
             </label>
             <input
               type="email"
-              placeholder="officer@department.go.ke"
+              placeholder="officer@county.go.ke"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-1.5 rounded-md border border-gray-300 text-xs text-gray-900 focus:outline-hidden focus:border-[#006633] focus:ring-1 focus:ring-[#006633]"
+              className="w-full px-3 py-1.5 rounded-lg border border-gray-300 text-xs text-gray-900 focus:outline-hidden focus:border-[#006633] focus:ring-1 focus:ring-[#006633]"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">
-              Access Password (Min. 6 chars)
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-gray-700">
+                Access Password
+              </label>
+              {password && (
+                <span className="text-[11px] font-semibold text-gray-700">
+                  Strength: <strong className="text-gray-900">{passwordAnalysis.label}</strong>
+                </span>
+              )}
+            </div>
             <input
               type="password"
-              placeholder="Create secure password"
+              placeholder="Create strong password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-1.5 rounded-md border border-gray-300 text-xs text-gray-900 focus:outline-hidden focus:border-[#006633] focus:ring-1 focus:ring-[#006633]"
+              className="w-full px-3 py-1.5 rounded-lg border border-gray-300 text-xs text-gray-900 focus:outline-hidden focus:border-[#006633] focus:ring-1 focus:ring-[#006633]"
             />
+
+            {password && (
+              <div className="mt-2 space-y-1.5">
+                <div className="w-full bg-gray-200 rounded-sm h-1.5 overflow-hidden">
+                  <div
+                    className={`h-1.5 transition-all duration-300 ${passwordAnalysis.color}`}
+                    style={{ width: `${passwordAnalysis.score}%` }}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-1 text-[10px] text-gray-600">
+                  <div className={`flex items-center gap-1 ${passwordAnalysis.hasMinLength ? 'text-emerald-700 font-semibold' : 'text-gray-500'}`}>
+                    {passwordAnalysis.hasMinLength ? <Check className="w-3 h-3 text-emerald-600" /> : <span className="w-1 h-1 rounded-sm bg-gray-300 mx-1"></span>}
+                    <span>8+ characters</span>
+                  </div>
+                  <div className={`flex items-center gap-1 ${passwordAnalysis.hasUpper ? 'text-emerald-700 font-semibold' : 'text-gray-500'}`}>
+                    {passwordAnalysis.hasUpper ? <Check className="w-3 h-3 text-emerald-600" /> : <span className="w-1 h-1 rounded-sm bg-gray-300 mx-1"></span>}
+                    <span>Uppercase (A-Z)</span>
+                  </div>
+                  <div className={`flex items-center gap-1 ${passwordAnalysis.hasLower ? 'text-emerald-700 font-semibold' : 'text-gray-500'}`}>
+                    {passwordAnalysis.hasLower ? <Check className="w-3 h-3 text-emerald-600" /> : <span className="w-1 h-1 rounded-sm bg-gray-300 mx-1"></span>}
+                    <span>Lowercase (a-z)</span>
+                  </div>
+                  <div className={`flex items-center gap-1 ${passwordAnalysis.hasNumber ? 'text-emerald-700 font-semibold' : 'text-gray-500'}`}>
+                    {passwordAnalysis.hasNumber ? <Check className="w-3 h-3 text-emerald-600" /> : <span className="w-1 h-1 rounded-sm bg-gray-300 mx-1"></span>}
+                    <span>Number (0-9)</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="pt-2 flex items-center gap-2">
             <button
               type="button"
               onClick={onCancel}
-              className="w-1/2 py-2 px-3 rounded-md border border-gray-300 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+              className="w-1/2 py-2 px-3 rounded-lg border border-gray-300 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="w-1/2 py-2 px-3 rounded-md bg-[#006633] hover:bg-[#004d26] text-white text-xs font-semibold transition-colors"
+              className="w-1/2 py-2 px-3 rounded-lg bg-[#006633] hover:bg-[#004d26] text-white text-xs font-semibold transition-colors"
             >
-              Register & Login
+              Register &amp; Login
             </button>
           </div>
         </form>
