@@ -394,7 +394,8 @@ export default function ApplicationWizard({
               setSubmittedRequest(null);
               setDescription('');
               setImageFile(null);
-              setImagePreview(null);
+              setImagePreviewUrl('');
+              setImageError('');
             }}
             className="px-6 py-3 rounded-3xl bg-[#008751] hover:bg-[#007043] text-white text-xs font-semibold transition-colors"
           >
